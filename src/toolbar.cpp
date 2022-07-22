@@ -1,0 +1,689 @@
+#include "toolbar.h"
+
+#include "toolbar_p.h"
+#include "toolbarlayout.h"
+#include "toolbarseparator.h"
+#include "toolbarcontainerlayout.h"
+#include "mainwindow.h"
+#include "mainwindow_p.h"
+
+#include <QActionEvent>
+#include <QApplication>
+#include <QPainter>
+#include <QStyle>
+#include <QStyleOption>
+#include <QStyleOptionToolBar>
+#include <QTimer>
+#include <QToolButton>
+#include <QWidgetAction>
+
+using namespace KDToolBars;
+
+namespace {
+MainWindow *mainWindow(const ToolBar *tb)
+{
+    auto *w = tb->parentWidget();
+    while (w != nullptr) {
+        if (auto *mw = qobject_cast<MainWindow *>(w); mw != nullptr)
+            return mw;
+        w = w->parentWidget();
+    }
+    return nullptr;
+}
+} // namespace
+
+ToolBar::Private::Private(ToolBar *toolbar)
+    : q(toolbar)
+{
+}
+
+void ToolBar::Private::init()
+{
+    q->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    q->setLineWidth(1);
+
+    q->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
+    q->setAttribute(Qt::WA_Hover);
+#if 0
+    // Make it a native window because we want a persistent window handle that stays "alive" after the
+    // widget is docked/undocked while being dragged, otherwise we lose mouse grab
+    q->setAttribute(Qt::WA_NativeWindow);
+#endif
+
+    auto *style = q->style();
+    int e = style->pixelMetric(QStyle::PM_ToolBarIconSize, nullptr, q);
+    m_iconSize = QSize(e, e);
+
+    m_layout = new ToolBarLayout(q, q);
+    m_layout->setContentsMargins(4, 4, 4, 4);
+
+    auto updateMinimumHeight = [this] {
+        // Set the minimum height to the height of a tool button
+        QStyleOptionToolButton opt;
+        opt.initFrom(q);
+        opt.rect.setSize(m_iconSize);
+        const auto buttonSize = q->style()->sizeFromContents(QStyle::CT_ToolButton, &opt, m_iconSize);
+        const auto margins = m_layout->contentsMargins();
+        const auto height = buttonSize.height() + margins.top() + margins.bottom();
+        q->setMinimumHeight(height);
+        m_layout->setMinimumSize(buttonSize);
+    };
+    QObject::connect(q, &ToolBar::iconSizeChanged, q, updateMinimumHeight);
+    updateMinimumHeight();
+
+    // Resize toolbar when icon size changes
+    QObject::connect(q, &ToolBar::iconSizeChanged, q, [this] {
+        if (q->isFloating()) {
+            // Postpone resizing because we want it to happen after the buttons have been resized
+            QTimer::singleShot(
+                    0, q, [this] { q->resize(m_layout->sizeHint().grownBy(q->contentsMargins())); });
+        }
+    });
+
+    // Add the close button
+    static auto closeIcon = QIcon(QStringLiteral(":/tb_close"));
+
+    m_closeButton = new QToolButton(q);
+    m_closeButton->setAutoRaise(true);
+    m_closeButton->setFocusPolicy(Qt::NoFocus);
+    m_closeButton->setIcon(closeIcon);
+    QObject::connect(m_closeButton, &QAbstractButton::clicked, q, &QWidget::close);
+    m_layout->setCloseButton(m_closeButton);
+}
+
+ToolBar::Private::Margin ToolBar::Private::marginAt(const QPoint &p) const
+{
+    constexpr auto kFrameMargin = 4;
+    if (p.x() < kFrameMargin)
+        return Margin::Left;
+    if (p.x() > q->width() - kFrameMargin)
+        return Margin::Right;
+    if (p.y() < kFrameMargin)
+        return Margin::Top;
+    if (p.y() > q->height() - kFrameMargin)
+        return Margin::Bottom;
+    return Margin::None;
+}
+
+bool ToolBar::Private::resizeStart(const QPoint &p)
+{
+    if (isResizing())
+        return false;
+    if (!q->isFloating() || !isResizable())
+        return false;
+    const auto margin = marginAt(p);
+    if (margin == Margin::None)
+        return false;
+    m_resizeMargin = margin;
+    return true;
+}
+
+void ToolBar::Private::resizeEnd()
+{
+    m_resizeMargin = Margin::None;
+    q->setCursor(Qt::ArrowCursor);
+}
+
+void ToolBar::Private::dragMargin(const QPoint &p)
+{
+    auto geometry = q->geometry();
+    const auto contentsMargins = q->contentsMargins();
+    switch (m_resizeMargin) {
+    case Margin::Left: {
+        const auto topRight = geometry.topRight();
+        const int width = geometry.right() - p.x() + 1;
+        geometry.setSize(m_layout->preferredSizeForWidth(width).grownBy(contentsMargins));
+        geometry.moveTopRight(topRight);
+        break;
+    }
+    case Margin::Right: {
+        const int width = p.x() - geometry.left() + 1;
+        geometry.setSize(m_layout->preferredSizeForWidth(width).grownBy(contentsMargins));
+        break;
+    }
+    case Margin::Top: {
+        const auto bottomLeft = geometry.bottomLeft();
+        const auto height = geometry.bottom() - p.y() + 1;
+        geometry.setSize(m_layout->preferredSizeForHeight(height).grownBy(contentsMargins));
+        geometry.moveBottomLeft(bottomLeft);
+        break;
+    }
+    case Margin::Bottom: {
+        const auto height = p.y() - geometry.top() + 1;
+        geometry.setSize(m_layout->preferredSizeForHeight(height).grownBy(contentsMargins));
+        break;
+    }
+    case Margin::None:
+        Q_ASSERT(false);
+        break;
+    }
+    q->setGeometry(geometry);
+}
+
+bool ToolBar::Private::mousePressEvent(const QMouseEvent *me)
+{
+    if (me->button() != Qt::LeftButton)
+        return false;
+
+    // start resize?
+    if (resizeStart(me->pos())) {
+        return true;
+    }
+
+    // start drag?
+    const bool startDrag = [this, me] {
+        if (q->isFloating())
+            return titleArea().contains(me->pos());
+        else
+            return handleArea().contains(me->pos());
+    }();
+    if (startDrag) {
+        m_isDragging = true;
+        m_dragPos = m_initialDragPos = me->pos();
+        qApp->installEventFilter(this);
+        q->grabMouse(Qt::SizeAllCursor);
+        return true;
+    }
+
+    return false;
+}
+
+bool ToolBar::Private::mouseMoveEvent(const QMouseEvent *me)
+{
+    if (q->isFloating() && isResizing()) {
+        dragMargin(me->globalPos());
+        return true;
+    }
+
+    if (m_isDragging) {
+        auto *mw = mainWindow(q);
+        Q_ASSERT(mw);
+        auto *layout = mw->d->m_layout;
+        if (q->isFloating()) {
+            const QPoint pos = me->globalPos() - m_dragPos;
+            q->move(pos);
+            layout->hoverToolBar(q);
+        } else {
+            const QPoint delta = me->globalPos() - q->mapToGlobal(m_dragPos);
+            layout->moveToolBar(q, q->pos() + delta);
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool ToolBar::Private::mouseReleaseEvent(const QMouseEvent *me)
+{
+    if (isResizing()) {
+        resizeEnd();
+        return true;
+    }
+
+    if (m_isDragging) {
+        q->releaseMouse();
+        qApp->removeEventFilter(this);
+        if (!q->isFloating()) {
+            auto *mw = mainWindow(q);
+            Q_ASSERT(mw);
+            mw->d->m_layout->adjustToolBarRow(q);
+        }
+        m_isDragging = false;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool ToolBar::Private::mouseDoubleClickEvent(const QMouseEvent *me)
+{
+    if (me->button() != Qt::LeftButton)
+        return false;
+    const auto shouldDock = q->isFloating() && titleArea().contains(me->pos());
+    if (shouldDock) {
+        dock();
+        return true;
+    }
+
+    return false;
+}
+
+bool ToolBar::Private::hoverMoveEvent(const QHoverEvent *he)
+{
+    if (!isResizing()) {
+        const auto cursor = [this, he] {
+            if (q->isFloating() && isResizable()) {
+                const auto margin = marginAt(he->pos());
+                switch (margin) {
+                case ToolBar::Private::Margin::Left:
+                case ToolBar::Private::Margin::Right:
+                    return Qt::SizeHorCursor;
+                case ToolBar::Private::Margin::Top:
+                case ToolBar::Private::Margin::Bottom:
+                    return Qt::SizeVerCursor;
+                default:
+                    break;
+                }
+            } else {
+                if (m_isDragging || handleArea().contains(he->pos()))
+                    return Qt::SizeAllCursor;
+            }
+
+            return Qt::ArrowCursor;
+        }();
+        q->setCursor(cursor);
+    }
+    return true;
+}
+
+QRect ToolBar::Private::titleArea() const
+{
+    return m_layout->titleArea().translated(q->contentsRect().topLeft());
+}
+
+QRect ToolBar::Private::handleArea() const
+{
+    return m_layout->handleArea().translated(q->contentsRect().topLeft());
+}
+
+bool ToolBar::Private::isMoving() const
+{
+    return !q->isFloating() && m_isDragging;
+}
+
+void ToolBar::Private::undock(const QPoint &pos)
+{
+    if (q->isFloating())
+        return;
+    setWindowState(true, pos);
+}
+
+void ToolBar::Private::dock()
+{
+    if (!q->isFloating())
+        return;
+    setWindowState(false, {});
+}
+
+void ToolBar::Private::setWindowState(bool floating, const QPoint &pos)
+{
+    if (m_isDragging) {
+        q->releaseMouse();
+    }
+
+    const auto wasVisible = !q->isHidden();
+    const auto prevMargins = m_layout->innerContentsMargins();
+    q->hide();
+
+    Qt::WindowFlags flags = floating ? Qt::Tool : Qt::Widget;
+    flags |= Qt::FramelessWindowHint;
+    if (floating)
+        flags |= Qt::X11BypassWindowManagerHint;
+    q->setWindowFlags(flags);
+
+    m_layout->invalidate();
+
+    const auto marginsTopLeft = [](const QMargins &margins) {
+        return QPoint(margins.left(), margins.top());
+    };
+    const auto marginsSize = [](const QMargins &margins) {
+        return QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
+    };
+    const auto margins = m_layout->innerContentsMargins();
+    if (floating) {
+        const auto marginOffset = marginsTopLeft(margins) - marginsTopLeft(prevMargins);
+        q->setGeometry(QRect(pos - marginOffset, q->sizeHint()));
+    }
+    if (m_isDragging) {
+        m_dragPos = m_initialDragPos + marginsTopLeft(margins) - marginsTopLeft(prevMargins);
+        m_initialDragPos = m_dragPos;
+    }
+
+    if (wasVisible) {
+        q->show();
+        q->activateWindow();
+    }
+
+    if (m_isDragging) {
+        q->grabMouse(Qt::SizeAllCursor);
+    }
+
+    emit q->topLevelChanged(floating);
+}
+
+void ToolBar::Private::offsetDragPosition(const QPoint &offset)
+{
+    m_dragPos += offset;
+}
+
+QSize ToolBar::Private::dockedSize() const
+{
+    return m_layout->dockedContentsSize(m_dockedOrientation)
+            .grownBy(m_layout->innerContentsMargins(false, m_dockedOrientation))
+            .grownBy(q->contentsMargins());
+}
+
+bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
+{
+    if (m_isDragging) {
+        if (event->type() == QEvent::Enter) {
+            // eat the QEvent::Enter event if the object that got it is a child of a toolbar
+            const auto isToolbarChild = [this, watched] {
+                auto *w = qobject_cast<QWidget *>(watched);
+                if (w == nullptr)
+                    return false;
+                auto *p = w->parentWidget();
+                while (p != nullptr) {
+                    if (qobject_cast<ToolBar *>(p) != nullptr)
+                        return true;
+                    p = p->parentWidget();
+                }
+                return false;
+            }();
+            return isToolbarChild;
+        }
+    }
+    return false;
+}
+
+ToolBar::ToolBar(const QString &title, QWidget *parent)
+    : QFrame(parent), d(new Private(this))
+{
+#if TODO
+    Q_INIT_RESOURCE(mfcutils);
+#endif
+    setWindowTitle(title);
+    d->init();
+}
+
+ToolBar::~ToolBar()
+{
+    delete d;
+}
+
+void ToolBar::paintEvent(QPaintEvent *event)
+{
+    QFrame::paintEvent(event);
+
+    QPainter p(this);
+    QStyle *style = this->style();
+
+    if (isFloating()) {
+        // paint title bar
+        const auto titleArea = d->titleArea();
+
+        static const QColor captionColor = QColor(156, 182, 209);
+
+        const auto active = window()->isActiveWindow();
+        p.setPen(palette().window().color().darker(130));
+        p.setBrush(captionColor);
+        p.drawRect(titleArea.adjusted(0, 1, -1, -3));
+
+        auto textRect = titleArea;
+        textRect.setWidth(textRect.width() - d->m_closeButton->width());
+
+        QStyleOptionDockWidget opt;
+        opt.initFrom(this);
+        opt.title = windowTitle();
+        opt.rect = textRect;
+
+        QFont f = p.font();
+        f.setBold(true);
+        p.setFont(f);
+
+        style->drawControl(QStyle::CE_DockWidgetTitle, &opt, &p, this);
+    } else {
+        // paint handle
+        QStyleOption opt;
+        opt.initFrom(this);
+        opt.rect = d->handleArea();
+        if (d->m_dockedOrientation == Qt::Horizontal)
+            opt.state = QStyle::State_Horizontal;
+        style->drawPrimitive(QStyle::PE_IndicatorToolBarHandle, &opt, &p, this);
+    }
+}
+
+void ToolBar::actionEvent(QActionEvent *event)
+{
+    QAction *action = event->action();
+    switch (event->type()) {
+    case QEvent::ActionAdded: {
+        int index = d->m_layout->count() - 1; // count includes the close button
+        if (event->before()) {
+            index = d->m_layout->indexOf(widgetForAction(event->before()));
+            Q_ASSERT(index != -1);
+        }
+        auto item = createWidgetForAction(action);
+        d->m_layout->InsertWidget(index, item.widget, item.type);
+        d->m_actionWidgets[action] = item;
+        if (isFloating()) {
+            item.widget->show();
+            resize(layout()->sizeHint().grownBy(contentsMargins()));
+        }
+        break;
+    }
+    case QEvent::ActionChanged: {
+        d->m_layout->invalidate();
+        break;
+    }
+    case QEvent::ActionRemoved: {
+        auto it = d->m_actionWidgets.find(action);
+        Q_ASSERT(it != d->m_actionWidgets.end());
+        const auto item = it->second;
+        d->m_layout->removeWidget(item.widget);
+        d->m_actionWidgets.erase(it);
+        if (item.type == ToolBarLayout::ToolBarWidgetType::CustomWidget) {
+            if (auto *widgetAction = qobject_cast<QWidgetAction *>(action))
+                widgetAction->releaseWidget(item.widget);
+        } else {
+            delete item.widget;
+        }
+        if (isFloating()) {
+            layout()->invalidate();
+            resize(layout()->sizeHint().grownBy(contentsMargins()));
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+bool ToolBar::event(QEvent *event)
+{
+    switch (event->type()) {
+    case QEvent::MouseButtonPress: {
+        const auto *me = static_cast<QMouseEvent *>(event);
+        if (d->mousePressEvent(me))
+            return true;
+        break;
+    }
+    case QEvent::MouseMove: {
+        const auto *me = static_cast<QMouseEvent *>(event);
+        if (d->mouseMoveEvent(me))
+            return true;
+        break;
+    }
+    case QEvent::MouseButtonRelease: {
+        const auto *me = static_cast<QMouseEvent *>(event);
+        if (d->mouseReleaseEvent(me))
+            return true;
+        break;
+    }
+    case QEvent::MouseButtonDblClick: {
+        const auto *me = static_cast<QMouseEvent *>(event);
+        if (d->mouseDoubleClickEvent(me))
+            return true;
+        break;
+    }
+    case QEvent::HoverMove: {
+        const auto *he = static_cast<QHoverEvent *>(event);
+        if (d->hoverMoveEvent(he))
+            return true;
+        break;
+    }
+    default:
+        break;
+    }
+    return QWidget::event(event);
+}
+
+ToolBar::ActionWidget ToolBar::createWidgetForAction(QAction *action)
+{
+    // separator
+    if (action->isSeparator()) {
+        auto *separator = new ToolBarSeparator(this);
+        return { ToolBarLayout::ToolBarWidgetType::Separator, separator };
+    }
+
+    // custom widget
+    if (auto *widgetAction = qobject_cast<QWidgetAction *>(action)) {
+        if (auto *widget = widgetAction->requestWidget(this)) {
+            widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
+            return { ToolBarLayout::ToolBarWidgetType::CustomWidget, widget };
+        }
+    }
+
+    // standard button
+    auto *button = new QToolButton(this);
+    button->setAutoRaise(true);
+    button->setFocusPolicy(Qt::NoFocus);
+    button->setIconSize(iconSize());
+    connect(this, &ToolBar::iconSizeChanged, button, &QToolButton::setIconSize);
+    button->setToolButtonStyle(toolButtonStyle());
+    connect(this, &ToolBar::toolButtonStyleChanged, button, &QToolButton::setToolButtonStyle);
+    button->setDefaultAction(action);
+    return { ToolBarLayout::ToolBarWidgetType::StandardButton, button };
+}
+
+bool ToolBar::columnLayout() const
+{
+    return d->m_columnLayout;
+}
+
+void ToolBar::setColumnLayout(bool columnLayout)
+{
+    if (columnLayout == d->m_columnLayout)
+        return;
+    d->m_columnLayout = columnLayout;
+    d->m_layout->invalidate();
+}
+
+int ToolBar::columns() const
+{
+    return d->m_layout->columns();
+}
+
+void ToolBar::setColumns(int columns)
+{
+    d->m_layout->setColumns(columns);
+}
+
+void ToolBar::setSpacing(int spacing)
+{
+    d->m_layout->setSpacing(spacing);
+}
+
+QWidget *ToolBar::widgetForAction(const QAction *action) const
+{
+    auto it = d->m_actionWidgets.find(action);
+    return it != d->m_actionWidgets.end() ? it->second.widget : nullptr;
+}
+
+void ToolBar::clear()
+{
+    const auto actions = this->actions();
+    for (QAction *action : actions)
+        removeAction(action);
+}
+
+QAction *ToolBar::addSeparator()
+{
+    QAction *action = new QAction(this);
+    action->setSeparator(true);
+    addAction(action);
+    return action;
+}
+
+bool ToolBar::isFloating() const
+{
+    return isWindow();
+}
+
+QSize ToolBar::iconSize() const
+{
+    return d->m_iconSize;
+}
+
+void ToolBar::setIconSize(const QSize &iconSize)
+{
+    d->m_explicitIconSize = true;
+    QSize size = iconSize;
+    if (size.isNull()) {
+        int e = style()->pixelMetric(QStyle::PM_ToolBarIconSize, nullptr, this);
+        size = QSize(e, e);
+    }
+    if (size == d->m_iconSize)
+        return;
+    d->m_iconSize = size;
+    emit iconSizeChanged(size);
+}
+
+Qt::ToolButtonStyle ToolBar::toolButtonStyle() const
+{
+    return d->m_toolButtonStyle;
+}
+
+void ToolBar::setToolButtonStyle(Qt::ToolButtonStyle style)
+{
+    d->m_explicitToolButtonStyle = true;
+    if (style == d->m_toolButtonStyle)
+        return;
+    d->m_toolButtonStyle = style;
+    emit toolButtonStyleChanged(style);
+}
+
+void ToolBar::setDockedOrientation(Qt::Orientation orientation)
+{
+    if (d->m_dockedOrientation == orientation)
+        return;
+    d->m_dockedOrientation = orientation;
+    d->m_layout->invalidate();
+}
+
+Qt::Orientation ToolBar::dockedOrientation() const
+{
+    return d->m_dockedOrientation;
+}
+
+void ToolBar::setAllowedTrays(ToolBarTrays trays)
+{
+    d->m_allowedTrays = trays;
+}
+
+ToolBarTrays ToolBar::allowedTrays() const
+{
+    return d->m_allowedTrays;
+}
+
+QToolButton *ToolBar::closeButton() const
+{
+    return d->m_closeButton;
+}
+
+void ToolBar::updateIconSize(const QSize &size)
+{
+    if (d->m_explicitIconSize)
+        return;
+    setIconSize(size);
+    d->m_explicitIconSize = false;
+}
+
+void ToolBar::updateToolButtonStyle(Qt::ToolButtonStyle style)
+{
+    if (d->m_explicitToolButtonStyle)
+        return;
+    setToolButtonStyle(style);
+    d->m_explicitToolButtonStyle = false;
+}
