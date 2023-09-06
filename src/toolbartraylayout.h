@@ -22,8 +22,10 @@ namespace KDToolBars {
 class ToolBar;
 class ToolBarContainerLayout;
 
-struct ToolBarTrayLayoutState {
-    struct Item {
+struct ToolBarTrayLayoutState
+{
+    struct Item
+    {
         int pos;
         QString objectName;
         bool isHidden;
@@ -31,7 +33,8 @@ struct ToolBarTrayLayoutState {
         QPoint floatingPos;
         ToolBarLayoutState layoutState;
     };
-    struct Row {
+    struct Row
+    {
         std::vector<Item> items;
     };
     std::vector<Row> rows;
@@ -44,7 +47,7 @@ class ToolBarTrayLayout
 {
 public:
     explicit ToolBarTrayLayout(
-            ToolBarTray tray, Qt::Orientation orientation, ToolBarContainerLayout *parent);
+        ToolBarTray tray, Qt::Orientation orientation, ToolBarContainerLayout *parent);
     ~ToolBarTrayLayout();
 
     int count() const;
@@ -79,16 +82,19 @@ public:
     void applyState(const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars);
 
 private:
-    struct Item {
+    struct Item
+    {
         QLayoutItem *widgetItem;
         int pos;
         int size;
     };
-    struct ItemPath {
+    struct ItemPath
+    {
         int row;
         int index;
     };
-    struct Row {
+    struct Row
+    {
         QVector<Item> items;
         int pos;
         QSize sizeHint;

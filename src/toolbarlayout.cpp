@@ -31,7 +31,8 @@ bool isSeparator(QLayoutItem *item)
 } // namespace
 
 ToolBarLayout::ToolBarLayout(ToolBar *toolbar, QWidget *parent)
-    : QLayout(parent), m_toolbar(toolbar)
+    : QLayout(parent)
+    , m_toolbar(toolbar)
 {
 }
 
@@ -104,7 +105,7 @@ QSize ToolBarLayout::sizeHint() const
     if (m_dirty)
         updateGeometries();
     const auto sizeHint =
-            m_contentsSize.expandedTo(m_minimumSize).grownBy(innerContentsMargins());
+        m_contentsSize.expandedTo(m_minimumSize).grownBy(innerContentsMargins());
     return sizeHint;
 }
 
@@ -171,7 +172,7 @@ void ToolBarLayout::updateGeometries() const
                             separator->setOrientation(Qt::Horizontal);
                         }
                     }
-                    row.items.push_back(ItemRow::Item{ item, QRect(pos, size) });
+                    row.items.push_back(ItemRow::Item { item, QRect(pos, size) });
                     // add room for spacing between items
                     int spaceBetween = (i < rowEnd - 1) ? spacing() : 0;
                     pos.rx() += item->sizeHint().width() + spaceBetween;
@@ -202,7 +203,7 @@ void ToolBarLayout::updateGeometries() const
                 if (separator != nullptr)
                     separator->setOrientation(Qt::Vertical);
                 row.items.push_back(
-                        ItemRow::Item{ item, QRect(pos, QSize(rowWidth, item->sizeHint().height())) });
+                    ItemRow::Item { item, QRect(pos, QSize(rowWidth, item->sizeHint().height())) });
                 // add space between rows
                 int spaceBetween = (count < m_items.size()) ? spacing() : 0;
                 pos.ry() += item->sizeHint().height() + spaceBetween;
@@ -225,7 +226,7 @@ void ToolBarLayout::updateGeometries() const
                 if (separator != nullptr)
                     separator->setOrientation(Qt::Horizontal);
                 row.items.push_back(
-                        ItemRow::Item{ item, QRect(pos, QSize(item->sizeHint().width(), rowHeight)) });
+                    ItemRow::Item { item, QRect(pos, QSize(item->sizeHint().width(), rowHeight)) });
                 int spaceBetween = (count < m_items.size()) ? spacing() : 0;
                 pos.rx() += item->sizeHint().width() + spaceBetween;
             }
@@ -237,8 +238,7 @@ void ToolBarLayout::updateGeometries() const
             std::vector<int> rowBreaks;
             int column = 0;
             for (int i = 0, itemCount = static_cast<int>(m_items.size()); i < itemCount; ++i) {
-                if (column == m_columns || isSeparator(m_items[i]) ||
-                    (i > 0 && isSeparator(m_items[i - 1]))) {
+                if (column == m_columns || isSeparator(m_items[i]) || (i > 0 && isSeparator(m_items[i - 1]))) {
                     rowBreaks.push_back(i);
                     column = 0;
                 }
@@ -311,7 +311,7 @@ void ToolBarLayout::setGeometry(const QRect &geometry)
                 const auto titleHeight = this->titleHeight();
                 const auto size = widget->sizeHint();
                 const auto topLeft = QPoint(
-                        geometry.right() - right - size.width(), top + (titleHeight - size.height()) / 2);
+                    geometry.right() - right - size.width(), top + (titleHeight - size.height()) / 2);
                 widget->setGeometry(QRect(topLeft, size));
                 widget->show();
             } else {
@@ -371,14 +371,15 @@ void ToolBarLayout::setCloseButton(QWidget *widget)
 
 void ToolBarLayout::initializeDynamicLayouts() const
 {
-    struct Item {
+    struct Item
+    {
         QSize size;
         bool isSeparator;
     };
     std::vector<Item> items;
     items.reserve(m_items.size());
     std::transform(m_items.begin(), m_items.end(), std::back_inserter(items), [](QLayoutItem *item) {
-        return Item{ item->sizeHint(), isSeparator(item) };
+        return Item { item->sizeHint(), isSeparator(item) };
     });
 
     const auto itemCount = static_cast<int>(items.size());
@@ -387,12 +388,13 @@ void ToolBarLayout::initializeDynamicLayouts() const
 
     // dynamic programming: find minimum width of the layout if items starting out
     // at some index are laid out in n rows
-    struct Layout {
+    struct Layout
+    {
         std::vector<int> rowBreaks;
         int width;
     };
     std::vector<std::vector<std::optional<Layout>>> cache(
-            itemCount, std::vector<std::optional<Layout>>(itemCount + 1, std::nullopt));
+        itemCount, std::vector<std::optional<Layout>>(itemCount + 1, std::nullopt));
     for (int rows = 1; rows <= itemCount; ++rows) {
         for (int startItem = itemCount - rows; startItem >= 0; --startItem) {
             std::optional<Layout> result = std::nullopt;
@@ -413,7 +415,7 @@ void ToolBarLayout::initializeDynamicLayouts() const
                 if (items[startItem].isSeparator)
                     rowBreaks.push_back(startItem + 1);
                 rowBreaks.push_back(static_cast<int>(itemCount));
-                result = Layout{ rowBreaks, rowWidth };
+                result = Layout { rowBreaks, rowWidth };
             } else {
                 int rowWidth = 0;
                 const auto startsWithSeparator = items[startItem].isSeparator;
@@ -437,8 +439,8 @@ void ToolBarLayout::initializeDynamicLayouts() const
                             rowBreaks.push_back(startItem + 1);
                         rowBreaks.push_back(i + 1);
                         rowBreaks.insert(
-                                rowBreaks.end(), nextRow->rowBreaks.begin(), nextRow->rowBreaks.end());
-                        result = Layout{ std::move(rowBreaks), std::max(rowWidth, nextRow->width) };
+                            rowBreaks.end(), nextRow->rowBreaks.begin(), nextRow->rowBreaks.end());
+                        result = Layout { std::move(rowBreaks), std::max(rowWidth, nextRow->width) };
                     }
                 }
             }
@@ -470,12 +472,12 @@ void ToolBarLayout::initializeDynamicLayouts() const
             rowStart = rowEnd;
         }
         m_dynamicLayouts.push_back(
-                DynamicLayout{ QSize(layout->width, minimumHeight), std::move(rowBreaks) });
+            DynamicLayout { QSize(layout->width, minimumHeight), std::move(rowBreaks) });
     }
 }
 
 const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(
-        const QSize &availableSize) const
+    const QSize &availableSize) const
 {
     if (m_items.empty())
         return nullptr;
@@ -500,13 +502,13 @@ ToolBarLayout::DropSite ToolBarLayout::FindDropSite(const QPoint &layoutPos) con
     const auto contentsRect = m_geometry.marginsRemoved(innerContentsMargins());
     if (!contentsRect.contains(layoutPos)) {
         // cursor is outside the contents area
-        return DropSite{ -1, {}, 0 };
+        return DropSite { -1, {}, 0 };
     }
 
     const auto contentsTopLeft = contentsRect.topLeft();
     if (m_itemRows.empty()) {
         // layout is empty, insert it into the first position
-        return DropSite{ 0, contentsTopLeft, m_minimumSize.height() };
+        return DropSite { 0, contentsTopLeft, m_minimumSize.height() };
     }
 
     const auto pos = layoutPos - contentsTopLeft;
@@ -541,24 +543,24 @@ ToolBarLayout::DropSite ToolBarLayout::FindDropSite(const QPoint &layoutPos) con
 
     // find item in row that's closest to pos
     const auto it = std::min_element(
-            items.begin(), items.end(), [pos, coord](const ItemRow::Item &lhs, const ItemRow::Item &rhs) {
-                auto distance = [pos, coord](const ItemRow::Item &item) {
-                    return std::abs(coord(pos) - coord(item.geometry.center()));
-                };
-                return distance(lhs) < distance(rhs);
-            });
+        items.begin(), items.end(), [pos, coord](const ItemRow::Item &lhs, const ItemRow::Item &rhs) {
+            auto distance = [pos, coord](const ItemRow::Item &item) {
+                return std::abs(coord(pos) - coord(item.geometry.center()));
+            };
+            return distance(lhs) < distance(rhs);
+        });
 
     if (coord(pos) < coord(it->geometry.center())) {
         // place it on the left side of item
-        return DropSite{ itemIndex(it->item), it->geometry.topLeft() + contentsTopLeft,
-                         row.height };
+        return DropSite { itemIndex(it->item), it->geometry.topLeft() + contentsTopLeft,
+                          row.height };
     } else {
         // place it on the right side of item
         auto next = std::next(it);
         if (next != items.end()) {
             // place it on the left side of next item
-            return DropSite{ itemIndex(next->item), next->geometry.topLeft() + contentsTopLeft,
-                             row.height };
+            return DropSite { itemIndex(next->item), next->geometry.topLeft() + contentsTopLeft,
+                              row.height };
         } else {
             // place it after the last item in the row
             auto topLeft = it->geometry.topLeft();
@@ -566,7 +568,7 @@ ToolBarLayout::DropSite ToolBarLayout::FindDropSite(const QPoint &layoutPos) con
                 topLeft += QPoint(0, it->geometry.height());
             else
                 topLeft += QPoint(it->geometry.width(), 0);
-            return DropSite{ itemIndex(it->item) + 1, topLeft + contentsTopLeft, row.height };
+            return DropSite { itemIndex(it->item) + 1, topLeft + contentsTopLeft, row.height };
         }
     }
 }
@@ -583,11 +585,11 @@ int ToolBarLayout::titleHeight(bool floating) const
     constexpr auto kTitleMargin = 3;
     constexpr auto kTitleBarButtonMargin = 2;
     const QSize closeSize =
-            m_closeButton != nullptr ? m_closeButton->widget()->sizeHint() : QSize(0, 0);
+        m_closeButton != nullptr ? m_closeButton->widget()->sizeHint() : QSize(0, 0);
     const QFontMetrics titleFontMetrics = m_toolbar->fontMetrics();
     return std::max(
-            closeSize.height() + 2 * kTitleBarButtonMargin,
-            titleFontMetrics.height() + 2 * kTitleMargin);
+        closeSize.height() + 2 * kTitleBarButtonMargin,
+        titleFontMetrics.height() + 2 * kTitleMargin);
 }
 
 QRect ToolBarLayout::titleArea() const
@@ -673,7 +675,7 @@ QMargins ToolBarLayout::innerContentsMargins() const
 }
 
 QMargins ToolBarLayout::innerContentsMargins(
-        bool floating, Qt::Orientation dockedOrientation) const
+    bool floating, Qt::Orientation dockedOrientation) const
 {
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);
@@ -700,7 +702,7 @@ ToolBarLayout::LayoutType ToolBarLayout::layoutType() const
 }
 
 ToolBarLayout::LayoutType ToolBarLayout::layoutType(
-        bool floating, Qt::Orientation dockedOrientation) const
+    bool floating, Qt::Orientation dockedOrientation) const
 {
     if (m_toolbar->columnLayout())
         return ToolBarLayout::LayoutType::Columns;

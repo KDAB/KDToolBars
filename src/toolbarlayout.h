@@ -16,7 +16,8 @@ namespace KDToolBars {
 
 class ToolBar;
 
-struct ToolBarLayoutState {
+struct ToolBarLayoutState
+{
     std::vector<int> rowBreaks;
 
     void save(QDataStream &stream) const;
@@ -63,7 +64,8 @@ public:
     void invalidate() override;
 
     // find where to place the drop indicator when hovering over this layout
-    struct DropSite {
+    struct DropSite
+    {
         int itemIndex = 0;
         QPoint topLeft;
         int size = 0; // width if m_layoutType == LayoutType::Vertical, height otherwise
@@ -83,15 +85,18 @@ private:
     int titleHeight(bool floating) const;
     int handleExtent(bool floating) const;
 
-    struct DynamicLayout {
+    struct DynamicLayout
+    {
         QSize minimumSize;
         std::vector<int> rowBreaks;
     };
 
-    enum class LayoutType { Horizontal,
-                            Vertical,
-                            Columns,
-                            Dynamic };
+    enum class LayoutType {
+        Horizontal,
+        Vertical,
+        Columns,
+        Dynamic
+    };
     LayoutType layoutType() const;
     LayoutType layoutType(bool floating, Qt::Orientation dockedOrientation) const;
 
@@ -102,9 +107,11 @@ private:
     ToolBar *m_toolbar;
     QVector<QLayoutItem *> m_items;
     QLayoutItem *m_closeButton = nullptr;
-    struct ItemRow {
+    struct ItemRow
+    {
         int height; // width if m_layoutType == LayoutType::Vertical
-        struct Item {
+        struct Item
+        {
             QLayoutItem *item;
             QRect geometry;
         };

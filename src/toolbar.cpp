@@ -86,7 +86,7 @@ void ToolBar::Private::init()
         if (q->isFloating()) {
             // Postpone resizing because we want it to happen after the buttons have been resized
             QTimer::singleShot(
-                    0, q, [this] { q->resize(m_layout->sizeHint().grownBy(q->contentsMargins())); });
+                0, q, [this] { q->resize(m_layout->sizeHint().grownBy(q->contentsMargins())); });
         }
     });
 
@@ -370,8 +370,8 @@ void ToolBar::Private::offsetDragPosition(const QPoint &offset)
 QSize ToolBar::Private::dockedSize() const
 {
     return m_layout->dockedContentsSize(m_dockedOrientation)
-            .grownBy(m_layout->innerContentsMargins(false, m_dockedOrientation))
-            .grownBy(q->contentsMargins());
+        .grownBy(m_layout->innerContentsMargins(false, m_dockedOrientation))
+        .grownBy(q->contentsMargins());
 }
 
 bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
@@ -398,7 +398,8 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
 }
 
 ToolBar::ToolBar(const QString &title, QWidget *parent)
-    : QFrame(parent), d(new Private(this))
+    : QFrame(parent)
+    , d(new Private(this))
 {
 #if TODO
     Q_INIT_RESOURCE(mfcutils);

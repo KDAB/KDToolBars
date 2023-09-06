@@ -17,13 +17,16 @@
 using namespace KDToolBars;
 
 MainWindow::Private::Private(MainWindow *mainWindow)
-    : q(mainWindow), m_container(new QWidget(mainWindow)), m_layout(new ToolBarContainerLayout(m_container))
+    : q(mainWindow)
+    , m_container(new QWidget(mainWindow))
+    , m_layout(new ToolBarContainerLayout(m_container))
 {
     m_layout->setContentsMargins(0, 0, 0, 0);
 }
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags), d(new Private(this))
+    : QMainWindow(parent, flags)
+    , d(new Private(this))
 {
     QMainWindow::setCentralWidget(d->m_container);
 }

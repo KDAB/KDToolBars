@@ -19,8 +19,10 @@
 using namespace KDToolBars;
 
 ToolBarTrayLayout::ToolBarTrayLayout(
-        ToolBarTray tray, Qt::Orientation orientation, ToolBarContainerLayout *parent)
-    : m_parent(parent), m_tray(tray), m_orientation(orientation)
+    ToolBarTray tray, Qt::Orientation orientation, ToolBarContainerLayout *parent)
+    : m_parent(parent)
+    , m_tray(tray)
+    , m_orientation(orientation)
 {
 }
 
@@ -188,8 +190,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
     bool unplug = [this, &cursorPos, &topLeft, &availableSize] {
         const auto localCursorPos = m_parent->parentWidget()->mapFromGlobal(cursorPos);
         constexpr auto kDockMargin = 8;
-        return pick(localCursorPos) < pick(topLeft) - kDockMargin ||
-                pick(localCursorPos) > pick(topLeft) + pick(availableSize) + kDockMargin;
+        return pick(localCursorPos) < pick(topLeft) - kDockMargin || pick(localCursorPos) > pick(topLeft) + pick(availableSize) + kDockMargin;
     }();
 
     if (!unplug) {
@@ -199,7 +200,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
                 // find top-most non-empty row
                 Q_ASSERT(!m_rows.empty());
                 auto it = std::find_if(
-                        m_rows.begin(), m_rows.end(), [](const Row &row) { return row.dockedCount() > 0; });
+                    m_rows.begin(), m_rows.end(), [](const Row &row) { return row.dockedCount() > 0; });
                 Q_ASSERT(it != m_rows.end());
                 const auto index = static_cast<int>(std::distance(m_rows.begin(), it));
                 if (index != itemPath->row)
@@ -221,14 +222,14 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
     // moving down, should we create another bottom row?
     if (newRow == -1 && !unplug) {
         int totalSize = std::accumulate(
-                m_rows.begin(), m_rows.end(), 0,
-                [this](int size, const Row &row) { return perp(row.sizeHint) + size; });
+            m_rows.begin(), m_rows.end(), 0,
+            [this](int size, const Row &row) { return perp(row.sizeHint) + size; });
         if (center > totalSize) {
             const auto createRow = [this, &itemPath] {
                 // find bottom-most non-empty row
                 Q_ASSERT(!m_rows.empty());
                 auto it = std::find_if(
-                        m_rows.rbegin(), m_rows.rend(), [](const Row &row) { return row.dockedCount() > 0; });
+                    m_rows.rbegin(), m_rows.rend(), [](const Row &row) { return row.dockedCount() > 0; });
                 Q_ASSERT(it != m_rows.rend());
                 const auto index = static_cast<int>(std::distance(m_rows.begin(), std::next(it).base()));
                 if (index != itemPath->row)
@@ -280,7 +281,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
             if (rowRemoved && movingDown)
                 --newRow;
             Q_ASSERT(newRow >= 0 && newRow < m_rows.count());
-            m_rows[newRow].items.append(Item{ item, newPos });
+            m_rows[newRow].items.append(Item { item, newPos });
 
             const auto bottomUp = m_tray == ToolBarTray::Bottom || m_tray == ToolBarTray::Right;
 
@@ -300,7 +301,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
             if (offset != 0) {
                 offset *= perp(itemSize);
                 toolbar->d->offsetDragPosition(
-                        m_orientation == Qt::Horizontal ? QPoint(0, offset) : QPoint(offset, 0));
+                    m_orientation == Qt::Horizontal ? QPoint(0, offset) : QPoint(offset, 0));
             }
         } else {
             auto &item = m_rows[itemPath->row].items[itemPath->index];
@@ -341,8 +342,8 @@ void ToolBarTrayLayout::insertToolBar(ToolBar *before, ToolBar *toolbar)
 
     // position it after other items in the row
     auto pos = std::accumulate(
-            items.begin(), items.begin() + index, 0,
-            [this](int pos, const auto &item) { return pos + pick(item.widgetItem->sizeHint()); });
+        items.begin(), items.begin() + index, 0,
+        [this](int pos, const auto &item) { return pos + pick(item.widgetItem->sizeHint()); });
 
     items.insert(index, { item, pos });
 
@@ -385,8 +386,8 @@ void ToolBarTrayLayout::insertToolBarBreak(ToolBar *before)
         item.pos -= offset;
 
     m_rows.remove(path->row);
-    m_rows.insert(path->row, Row{ std::move(rightItems), 0, {} });
-    m_rows.insert(path->row, Row{ std::move(leftItems), 0, {} });
+    m_rows.insert(path->row, Row { std::move(rightItems), 0, {} });
+    m_rows.insert(path->row, Row { std::move(leftItems), 0, {} });
 }
 
 void ToolBarTrayLayout::updateRowSizes() const
@@ -416,7 +417,7 @@ void ToolBarTrayLayout::updateRowSizes() const
 }
 
 std::optional<ToolBarTrayLayout::ItemPath> ToolBarTrayLayout::FindItem(
-        const QWidget *widget) const
+    const QWidget *widget) const
 {
     for (int row = 0, count = m_rows.count(); row < count; ++row) {
         auto &items = m_rows[row].items;
@@ -425,7 +426,7 @@ std::optional<ToolBarTrayLayout::ItemPath> ToolBarTrayLayout::FindItem(
         });
         if (it != items.end()) {
             auto index = static_cast<int>(std::distance(items.begin(), it));
-            return ItemPath{ row, index };
+            return ItemPath { row, index };
         }
     }
     return std::nullopt;
@@ -460,7 +461,7 @@ std::tuple<QLayoutItem *, bool> ToolBarTrayLayout::TakeLayoutItem(const ItemPath
 }
 
 QVector<ToolBarTrayLayout::Item> ToolBarTrayLayout::adjustRow(
-        const Row &row, const ToolBar *pivot) const
+    const Row &row, const ToolBar *pivot) const
 {
     const auto &items = row.items;
 
@@ -482,15 +483,15 @@ QVector<ToolBarTrayLayout::Item> ToolBarTrayLayout::adjustRow(
     const auto pivotItemSize = pivotItem.size;
 
     auto usedSizeBefore = std::accumulate(
-            sortedItems.begin(), pivotIt, 0,
-            [this](int size, const auto &item) { return size + item.size; });
+        sortedItems.begin(), pivotIt, 0,
+        [this](int size, const auto &item) { return size + item.size; });
     pivotItem.pos = std::max(usedSizeBefore, pivotItem.pos);
 
     auto usedSizeAfter = std::accumulate(
-            std::next(pivotIt), sortedItems.end(), 0,
-            [this](int size, const auto &item) { return size + item.size; });
+        std::next(pivotIt), sortedItems.end(), 0,
+        [this](int size, const auto &item) { return size + item.size; });
     pivotItem.pos = std::max(
-            std::min(pick(m_contentsRect.size()) - usedSizeAfter - pivotItemSize, pivotItem.pos), 0);
+        std::min(pick(m_contentsRect.size()) - usedSizeAfter - pivotItemSize, pivotItem.pos), 0);
 
     const auto pivotIndex = static_cast<int>(std::distance(sortedItems.begin(), pivotIt));
     auto adjustRange = [this, &sortedItems](int from, int to, int left, int right, int usedSize) {
@@ -508,7 +509,7 @@ QVector<ToolBarTrayLayout::Item> ToolBarTrayLayout::adjustRow(
     // adjust positions of toolbars after the pivot toolbar so they don't overlap
     const auto startAfter = pivotItem.pos + pivotItemSize;
     adjustRange(
-            pivotIndex + 1, sortedItems.size() - 1, startAfter, availableSize, usedSizeAfter);
+        pivotIndex + 1, sortedItems.size() - 1, startAfter, availableSize, usedSizeAfter);
 
     return sortedItems;
 }
@@ -516,8 +517,8 @@ QVector<ToolBarTrayLayout::Item> ToolBarTrayLayout::adjustRow(
 int ToolBarTrayLayout::adjustItemSizes(QVector<Item> &items, int availableSize) const
 {
     const auto minimumSize = std::accumulate(
-            items.begin(), items.end(), 0,
-            [this](int size, const auto &item) { return size + pick(item.widgetItem->minimumSize()); });
+        items.begin(), items.end(), 0,
+        [this](int size, const auto &item) { return size + pick(item.widgetItem->minimumSize()); });
     // adjust item sizes so that the available space is not exceeded
     auto extra = std::max(0, availableSize - minimumSize);
     auto used = 0;
@@ -548,7 +549,7 @@ bool ToolBarTrayLayout::hoverToolBar(ToolBar *toolbar)
         auto r = toolbar->contentsRect().marginsRemoved(layout->innerContentsMargins());
         r.setSize(layout->dockedContentsSize(m_orientation));
         r = r.marginsAdded(layout->innerContentsMargins(false, m_orientation))
-                    .marginsAdded(toolbar->contentsMargins());
+                .marginsAdded(toolbar->contentsMargins());
         r.moveTopLeft(m_parent->parentWidget()->mapFromGlobal(toolbar->mapToGlobal(r.topLeft())));
         return r;
     }();
@@ -562,15 +563,14 @@ bool ToolBarTrayLayout::hoverToolBar(ToolBar *toolbar)
         cursorPos = m_parent->parentWidget()->mapFromGlobal(cursorPos);
 
         // is the cursor within the tray?
-        if (pick(cursorPos) < pick(contentsTopLeft) ||
-            pick(cursorPos) > pick(contentsTopLeft) + pick(m_contentsRect.size()))
+        if (pick(cursorPos) < pick(contentsTopLeft) || pick(cursorPos) > pick(contentsTopLeft) + pick(m_contentsRect.size()))
             return false;
 
         // is the docked toolbar within the tray?
         constexpr auto kEmptyTraySize = 4;
         auto totalSize = std::accumulate(
-                m_rows.begin(), m_rows.end(), 0,
-                [this](int size, const Row &row) { return size + perp(row.sizeHint); });
+            m_rows.begin(), m_rows.end(), 0,
+            [this](int size, const Row &row) { return size + perp(row.sizeHint); });
         totalSize = std::max(totalSize, kEmptyTraySize);
 
         auto pos = perp(dockedRect.topLeft());
@@ -613,7 +613,7 @@ bool ToolBarTrayLayout::hoverToolBar(ToolBar *toolbar)
     m_rows.insert(plugRow, {});
     auto &items = m_rows[plugRow].items;
 
-    items.append(Item{ layoutItem, pick(dockedRect.topLeft()) - pick(contentsTopLeft) });
+    items.append(Item { layoutItem, pick(dockedRect.topLeft()) - pick(contentsTopLeft) });
     Item *item = &items.back();
 
     toolbar->d->dock();
@@ -669,7 +669,7 @@ ToolBarTrayLayoutState ToolBarTrayLayout::state() const
 }
 
 void ToolBarTrayLayout::applyState(
-        const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars)
+    const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars)
 {
     // remove all current toolbars
     for (auto &row : m_rows) {

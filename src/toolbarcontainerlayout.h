@@ -58,11 +58,13 @@ public:
     bool restoreState(QDataStream &stream);
 
 private:
-    enum TrayPosition { TopTray,
-                        LeftTray,
-                        RightTray,
-                        BottomTray,
-                        TrayCount };
+    enum TrayPosition {
+        TopTray,
+        LeftTray,
+        RightTray,
+        BottomTray,
+        TrayCount
+    };
     int trayIndex(ToolBarTray tray) const;
     std::array<ToolBarTrayLayout *, TrayCount> m_trays;
     std::unordered_map<const ToolBar *, ToolBarTrayLayout *> m_toolbarTray;

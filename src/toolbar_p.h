@@ -19,11 +19,13 @@ namespace KDToolBars {
 class ToolBar::Private : public QObject
 {
 public:
-    enum class Margin { Left,
-                        Right,
-                        Top,
-                        Bottom,
-                        None };
+    enum class Margin {
+        Left,
+        Right,
+        Top,
+        Bottom,
+        None
+    };
 
     explicit Private(ToolBar *toolbar);
 

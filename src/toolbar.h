@@ -75,7 +75,8 @@ protected:
     void updateToolButtonStyle(Qt::ToolButtonStyle style);
 
     void initStyleOption(QStyleOption *option);
-    struct ActionWidget {
+    struct ActionWidget
+    {
         ToolBarLayout::ToolBarWidgetType type;
         QWidget *widget;
     };

@@ -144,21 +144,19 @@ QSize ToolBarContainerLayout::minimumSize() const
 
 template<typename TraySizeGetterT, typename WidgetSizeGetterT>
 QSize ToolBarContainerLayout::layoutSize(
-        TraySizeGetterT traySize, WidgetSizeGetterT widgetSize) const
+    TraySizeGetterT traySize, WidgetSizeGetterT widgetSize) const
 {
     const auto topSize = (topTray()->*traySize)();
     const auto leftSize = (leftTray()->*traySize)();
     const auto rightSize = (rightTray()->*traySize)();
     const auto bottomSize = (bottomTray()->*traySize)();
     const auto centralWidgetSize =
-            m_centralWidget != nullptr ? (m_centralWidget->*widgetSize)() : QSize(0, 0);
+        m_centralWidget != nullptr ? (m_centralWidget->*widgetSize)() : QSize(0, 0);
     const auto width = std::max(
-            { topSize.width(), leftSize.width() + centralWidgetSize.width() + rightSize.width(),
-              bottomSize.width() });
+        { topSize.width(), leftSize.width() + centralWidgetSize.width() + rightSize.width(),
+          bottomSize.width() });
     const auto height =
-            topSize.height() +
-            std::max({ leftSize.height(), centralWidgetSize.height(), rightSize.height() }) +
-            bottomSize.height();
+        topSize.height() + std::max({ leftSize.height(), centralWidgetSize.height(), rightSize.height() }) + bottomSize.height();
     return QSize(width, height).grownBy(contentsMargins());
 }
 
@@ -303,8 +301,8 @@ void ToolBarContainerLayout::saveState(QDataStream &stream) const
 {
     stream << kLayoutVersionMarker;
     const auto count = std::accumulate(
-            m_trays.begin(), m_trays.end(), 0,
-            [](int count, const auto &tray) { return count + tray->count(); });
+        m_trays.begin(), m_trays.end(), 0,
+        [](int count, const auto &tray) { return count + tray->count(); });
     stream << count;
     for (const auto *tray : m_trays)
         tray->state().save(stream);
@@ -329,8 +327,8 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
     std::vector<ToolBar *> toolbars;
     toolbars.reserve(m_toolbarTray.size());
     std::transform(
-            m_toolbarTray.begin(), m_toolbarTray.end(), std::back_inserter(toolbars),
-            [](const auto &item) { return const_cast<ToolBar *>(item.first); });
+        m_toolbarTray.begin(), m_toolbarTray.end(), std::back_inserter(toolbars),
+        [](const auto &item) { return const_cast<ToolBar *>(item.first); });
 
     for (size_t i = 0; i < TrayCount; ++i)
         m_trays[i]->applyState(trayStates[i], toolbars);
@@ -342,7 +340,7 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
     // add back any toolbar that wasn't restored
     for (auto *toolbar : toolbars) {
         const auto found = std::any_of(
-                m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
+            m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
         if (!found) {
             auto *tray = oldToolbarTray[toolbar];
             tray->insertToolBar(nullptr, toolbar);
@@ -352,7 +350,7 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
     // reinitialize the toolbar -> tray map
     for (auto *toolbar : toolbars) {
         auto it = std::find_if(
-                m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
+            m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
         Q_ASSERT(it != m_trays.end());
         m_toolbarTray[toolbar] = *it;
     }
