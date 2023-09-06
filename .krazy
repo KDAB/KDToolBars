@@ -1,0 +1,26 @@
+CHECKSETS qt5,c++
+
+#KDAB-specific checks
+EXTRA kdabcopyright-reuse,kdabcontactus,fosslicense-reuse
+
+#additional checks
+#EXTRA defines,null
+
+#exclude checks now being done by clazy or clang-tools
+EXCLUDE strings,explicit,normalize,passbyvalue,operators,nullstrcompare,nullstrassign,doublequote_chars,qobject,sigsandslots,staticobjects,dpointer,inline,postfixop
+#exclude spelling as codespell is much, much better tool
+EXCLUDE spelling
+#exclude more checks
+EXCLUDE style
+
+SKIP /fwd_headers/
+SKIP Doxyfile.cmake
+
+SKIP /src/3rdparty/|/examples/qtquick/CMakeFiles/
+#skip CMake files
+SKIP /KDDockWidgetsConfig.cmake.in
+#skip more files
+SKIP CMakePresets.json
+SKIP \.cmake-format\.py
+#skip the borrowed code in the cmake subdir
+SKIP /cmake/ECM/|/cmake/KDAB/
