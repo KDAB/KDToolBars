@@ -6,15 +6,12 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-find_package(Qt5 COMPONENTS Test REQUIRED)
-
-add_executable(tst_toolbar
-    tst_toolbar.cpp
+find_package(
+    Qt5
+    COMPONENTS Test
+    REQUIRED
 )
 
-target_link_libraries(tst_toolbar
-PRIVATE
-    kdtoolbars
-    Qt5::Widgets
-    Qt5::Test
-)
+add_executable(tst_toolbar tst_toolbar.cpp)
+
+target_link_libraries(tst_toolbar PRIVATE kdtoolbars Qt5::Widgets Qt5::Test)
