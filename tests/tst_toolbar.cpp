@@ -8,7 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "toolbar.h"
+#include <kdtoolbars/toolbar.h>
 
 #include <QAction>
 #include <QProxyStyle>

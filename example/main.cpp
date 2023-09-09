@@ -8,10 +8,8 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "toolbar.h"
-#include "toolbartraylayout.h"
-#include "toolbarcontainerlayout.h"
-#include "mainwindow.h"
+#include <kdtoolbars/mainwindow.h>
+#include <kdtoolbars/toolbar.h>
 
 #include <QAction>
 #include <QApplication>

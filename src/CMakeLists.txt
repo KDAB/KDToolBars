@@ -6,27 +6,78 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-set(KDTOOLBARS_SRC
+set(KDTOOLBARS_SOURCES
     toolbar.cpp
-    toolbar.h
     toolbarseparator.cpp
     toolbarseparator.h
     toolbarlayout.cpp
-    toolbarlayout.h
     toolbartraylayout.cpp
     toolbartraylayout.h
     toolbarcontainerlayout.cpp
     toolbarcontainerlayout.h
     mainwindow.cpp
+)
+
+set(KDTOOLBARS_INSTALLABLE_HEADERS
+    toolbar.h
     mainwindow.h
+    toolbarlayout.h
 )
 
 set(KDTOOLBARS_RESOURCES
     kdtoolbars_resources.qrc
 )
 
-add_library(kdtoolbars ${KDTOOLBARS_SRC} ${KDTOOLBARS_RESOURCES})
+add_library(
+    kdtoolbars
+    ${KDTOOLBARS_SOURCES} ${KDTOOLBARS_INSTALLABLE_HEADERS} ${KDTOOLBARS_RESOURCES}
+)
 
-target_link_libraries(kdtoolbars PUBLIC Qt5::Widgets Qt5::WidgetsPrivate)
+target_link_libraries(
+    kdtoolbars
+    PUBLIC Qt5::Widgets Qt5::WidgetsPrivate
+)
 
-target_include_directories(kdtoolbars PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+    kdtoolbars
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fwd_headers>
+           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+foreach(file ${KDTOOLBARS_INSTALLABLE_HEADERS})
+    get_filename_component(dir ${file} DIRECTORY)
+    install(FILES ${file} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kdtoolbars/${dir})
+endforeach()
+
+install(
+    TARGETS kdtoolbars
+    EXPORT kdtoolbarsTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+    EXPORT kdtoolbarsTargets
+    FILE KDToolBarsTargets.cmake
+    NAMESPACE KDAB::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDToolBars
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    KDToolBarsConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDToolBars
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDToolBars
+)
