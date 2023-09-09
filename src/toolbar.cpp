@@ -29,6 +29,11 @@
 
 using namespace KDToolBars;
 
+static void initKDToolBarsResources()
+{
+    Q_INIT_RESOURCE(kdtoolbars_resources);
+}
+
 namespace {
 MainWindow *mainWindow(const ToolBar *tb)
 {
@@ -39,6 +44,15 @@ MainWindow *mainWindow(const ToolBar *tb)
         w = w->parentWidget();
     }
     return nullptr;
+}
+
+QIcon buttonIcon(const QString &iconName)
+{
+    QIcon icon;
+    icon.addFile(QStringLiteral(":/img/%1.png").arg(iconName));
+    icon.addFile(QStringLiteral(":/img/%1-1.5x.png").arg(iconName));
+    icon.addFile(QStringLiteral(":/img/%1-2x.png").arg(iconName));
+    return icon;
 }
 } // namespace
 
@@ -91,12 +105,11 @@ void ToolBar::Private::init()
     });
 
     // Add the close button
-    static auto closeIcon = QIcon(QStringLiteral(":/tb_close"));
 
     m_closeButton = new QToolButton(q);
     m_closeButton->setAutoRaise(true);
     m_closeButton->setFocusPolicy(Qt::NoFocus);
-    m_closeButton->setIcon(closeIcon);
+    m_closeButton->setIcon(buttonIcon(QStringLiteral("close")));
     QObject::connect(m_closeButton, &QAbstractButton::clicked, q, &QWidget::close);
     m_layout->setCloseButton(m_closeButton);
 }
@@ -401,9 +414,8 @@ ToolBar::ToolBar(const QString &title, QWidget *parent)
     : QFrame(parent)
     , d(new Private(this))
 {
-#if TODO
-    Q_INIT_RESOURCE(mfcutils);
-#endif
+    initKDToolBarsResources();
+
     setWindowTitle(title);
     d->init();
 }

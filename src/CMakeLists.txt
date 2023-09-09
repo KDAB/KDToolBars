@@ -21,7 +21,11 @@ set(KDTOOLBARS_SRC
     mainwindow.h
 )
 
-add_library(kdtoolbars ${KDTOOLBARS_SRC})
+set(KDTOOLBARS_RESOURCES
+    kdtoolbars_resources.qrc
+)
+
+add_library(kdtoolbars ${KDTOOLBARS_SRC} ${KDTOOLBARS_RESOURCES})
 
 target_link_libraries(kdtoolbars PUBLIC Qt5::Widgets Qt5::WidgetsPrivate)
 
