@@ -11,6 +11,7 @@
 #pragma once
 
 #include "toolbar.h"
+#include "toolbarlayout.h"
 
 #include <unordered_map>
 
@@ -36,6 +37,7 @@ public:
     void resizeEnd();
     void dragMargin(const QPoint &p);
 
+    void actionEvent(QActionEvent *event);
     bool mousePressEvent(const QMouseEvent *me);
     bool mouseMoveEvent(const QMouseEvent *me);
     bool mouseReleaseEvent(const QMouseEvent *me);
@@ -68,6 +70,15 @@ public:
     }
 
     bool eventFilter(QObject *watched, QEvent *event) override;
+
+    QWidget *widgetForAction(const QAction *action) const;
+
+    struct ActionWidget
+    {
+        ToolBarLayout::ToolBarWidgetType type;
+        QWidget *widget;
+    };
+    ActionWidget createWidgetForAction(QAction *action);
 
     ToolBar *const q;
     bool m_columnLayout = false;

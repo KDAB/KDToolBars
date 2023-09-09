@@ -183,6 +183,58 @@ void ToolBar::Private::dragMargin(const QPoint &p)
     q->setGeometry(geometry);
 }
 
+QWidget *ToolBar::Private::widgetForAction(const QAction *action) const
+{
+    auto it = m_actionWidgets.find(action);
+    return it != m_actionWidgets.end() ? it->second.widget : nullptr;
+}
+
+void ToolBar::Private::actionEvent(QActionEvent *event)
+{
+    QAction *action = event->action();
+    switch (event->type()) {
+    case QEvent::ActionAdded: {
+        int index = m_layout->count() - 1; // count includes the close button
+        if (event->before()) {
+            index = m_layout->indexOf(widgetForAction(event->before()));
+            Q_ASSERT(index != -1);
+        }
+        auto item = createWidgetForAction(action);
+        m_layout->InsertWidget(index, item.widget, item.type);
+        m_actionWidgets[action] = item;
+        if (q->isFloating()) {
+            item.widget->show();
+            q->resize(m_layout->sizeHint().grownBy(q->contentsMargins()));
+        }
+        break;
+    }
+    case QEvent::ActionChanged: {
+        m_layout->invalidate();
+        break;
+    }
+    case QEvent::ActionRemoved: {
+        auto it = m_actionWidgets.find(action);
+        Q_ASSERT(it != m_actionWidgets.end());
+        const auto item = it->second;
+        m_layout->removeWidget(item.widget);
+        m_actionWidgets.erase(it);
+        if (item.type == ToolBarLayout::ToolBarWidgetType::CustomWidget) {
+            if (auto *widgetAction = qobject_cast<QWidgetAction *>(action))
+                widgetAction->releaseWidget(item.widget);
+        } else {
+            delete item.widget;
+        }
+        if (q->isFloating()) {
+            m_layout->invalidate();
+            q->resize(m_layout->sizeHint().grownBy(q->contentsMargins()));
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 bool ToolBar::Private::mousePressEvent(const QMouseEvent *me)
 {
     if (me->button() != Qt::LeftButton)
@@ -410,6 +462,34 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
     return false;
 }
 
+ToolBar::Private::ActionWidget ToolBar::Private::createWidgetForAction(QAction *action)
+{
+    // separator
+    if (action->isSeparator()) {
+        auto *separator = new ToolBarSeparator(q);
+        return { ToolBarLayout::ToolBarWidgetType::Separator, separator };
+    }
+
+    // custom widget
+    if (auto *widgetAction = qobject_cast<QWidgetAction *>(action)) {
+        if (auto *widget = widgetAction->requestWidget(q)) {
+            widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
+            return { ToolBarLayout::ToolBarWidgetType::CustomWidget, widget };
+        }
+    }
+
+    // standard button
+    auto *button = new QToolButton(q);
+    button->setAutoRaise(true);
+    button->setFocusPolicy(Qt::NoFocus);
+    button->setIconSize(m_iconSize);
+    QObject::connect(q, &ToolBar::iconSizeChanged, button, &QToolButton::setIconSize);
+    button->setToolButtonStyle(m_toolButtonStyle);
+    QObject::connect(q, &ToolBar::toolButtonStyleChanged, button, &QToolButton::setToolButtonStyle);
+    button->setDefaultAction(action);
+    return { ToolBarLayout::ToolBarWidgetType::StandardButton, button };
+}
+
 ToolBar::ToolBar(const QString &title, QWidget *parent)
     : QFrame(parent)
     , d(new Private(this))
@@ -469,48 +549,7 @@ void ToolBar::paintEvent(QPaintEvent *event)
 
 void ToolBar::actionEvent(QActionEvent *event)
 {
-    QAction *action = event->action();
-    switch (event->type()) {
-    case QEvent::ActionAdded: {
-        int index = d->m_layout->count() - 1; // count includes the close button
-        if (event->before()) {
-            index = d->m_layout->indexOf(widgetForAction(event->before()));
-            Q_ASSERT(index != -1);
-        }
-        auto item = createWidgetForAction(action);
-        d->m_layout->InsertWidget(index, item.widget, item.type);
-        d->m_actionWidgets[action] = item;
-        if (isFloating()) {
-            item.widget->show();
-            resize(layout()->sizeHint().grownBy(contentsMargins()));
-        }
-        break;
-    }
-    case QEvent::ActionChanged: {
-        d->m_layout->invalidate();
-        break;
-    }
-    case QEvent::ActionRemoved: {
-        auto it = d->m_actionWidgets.find(action);
-        Q_ASSERT(it != d->m_actionWidgets.end());
-        const auto item = it->second;
-        d->m_layout->removeWidget(item.widget);
-        d->m_actionWidgets.erase(it);
-        if (item.type == ToolBarLayout::ToolBarWidgetType::CustomWidget) {
-            if (auto *widgetAction = qobject_cast<QWidgetAction *>(action))
-                widgetAction->releaseWidget(item.widget);
-        } else {
-            delete item.widget;
-        }
-        if (isFloating()) {
-            layout()->invalidate();
-            resize(layout()->sizeHint().grownBy(contentsMargins()));
-        }
-        break;
-    }
-    default:
-        break;
-    }
+    d->actionEvent(event);
 }
 
 bool ToolBar::event(QEvent *event)
@@ -552,34 +591,6 @@ bool ToolBar::event(QEvent *event)
     return QWidget::event(event);
 }
 
-ToolBar::ActionWidget ToolBar::createWidgetForAction(QAction *action)
-{
-    // separator
-    if (action->isSeparator()) {
-        auto *separator = new ToolBarSeparator(this);
-        return { ToolBarLayout::ToolBarWidgetType::Separator, separator };
-    }
-
-    // custom widget
-    if (auto *widgetAction = qobject_cast<QWidgetAction *>(action)) {
-        if (auto *widget = widgetAction->requestWidget(this)) {
-            widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
-            return { ToolBarLayout::ToolBarWidgetType::CustomWidget, widget };
-        }
-    }
-
-    // standard button
-    auto *button = new QToolButton(this);
-    button->setAutoRaise(true);
-    button->setFocusPolicy(Qt::NoFocus);
-    button->setIconSize(iconSize());
-    connect(this, &ToolBar::iconSizeChanged, button, &QToolButton::setIconSize);
-    button->setToolButtonStyle(toolButtonStyle());
-    connect(this, &ToolBar::toolButtonStyleChanged, button, &QToolButton::setToolButtonStyle);
-    button->setDefaultAction(action);
-    return { ToolBarLayout::ToolBarWidgetType::StandardButton, button };
-}
-
 bool ToolBar::columnLayout() const
 {
     return d->m_columnLayout;
@@ -606,12 +617,6 @@ void ToolBar::setColumns(int columns)
 void ToolBar::setSpacing(int spacing)
 {
     d->m_layout->setSpacing(spacing);
-}
-
-QWidget *ToolBar::widgetForAction(const QAction *action) const
-{
-    auto it = d->m_actionWidgets.find(action);
-    return it != d->m_actionWidgets.end() ? it->second.widget : nullptr;
 }
 
 void ToolBar::clear()

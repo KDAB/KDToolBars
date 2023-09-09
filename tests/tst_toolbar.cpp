@@ -11,6 +11,7 @@
 #include <kdtoolbars/toolbar.h>
 
 #include <QAction>
+#include <QLayout>
 #include <QProxyStyle>
 #include <QTest>
 #include <QToolButton>

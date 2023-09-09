@@ -11,6 +11,7 @@ set(KDTOOLBARS_SOURCES
     toolbarseparator.cpp
     toolbarseparator.h
     toolbarlayout.cpp
+    toolbarlayout.h
     toolbartraylayout.cpp
     toolbartraylayout.h
     toolbarcontainerlayout.cpp
@@ -21,7 +22,6 @@ set(KDTOOLBARS_SOURCES
 set(KDTOOLBARS_INSTALLABLE_HEADERS
     toolbar.h
     mainwindow.h
-    toolbarlayout.h
 )
 
 set(KDTOOLBARS_RESOURCES

@@ -11,7 +11,6 @@
 #pragma once
 
 #include "mainwindow.h"
-#include "toolbarlayout.h"
 
 #include <QFrame>
 
@@ -39,8 +38,6 @@ public:
 
     // Set spacing between toolbar buttons
     void setSpacing(int spacing);
-
-    QWidget *widgetForAction(const QAction *action) const;
 
     QAction *addSeparator();
     void clear();
@@ -75,12 +72,6 @@ protected:
     void updateToolButtonStyle(Qt::ToolButtonStyle style);
 
     void initStyleOption(QStyleOption *option);
-    struct ActionWidget
-    {
-        ToolBarLayout::ToolBarWidgetType type;
-        QWidget *widget;
-    };
-    ActionWidget createWidgetForAction(QAction *action);
 
     class Private;
     Private *d;
