@@ -13,6 +13,8 @@
 #include <QStyleOption>
 #include <QPainter>
 
+using namespace KDToolBars;
+
 ToolBarSeparator::ToolBarSeparator(QWidget *parent)
     : QWidget(parent)
 {

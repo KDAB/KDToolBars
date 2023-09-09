@@ -14,6 +14,8 @@
 
 class QStyleOption;
 
+namespace KDToolBars {
+
 class ToolBarSeparator : public QWidget
 {
     Q_OBJECT
@@ -33,3 +35,5 @@ private:
 
     Qt::Orientation m_orientation = Qt::Horizontal;
 };
+
+} // namespace KDToolBars
