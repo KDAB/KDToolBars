@@ -13,5 +13,5 @@ find_package(
 )
 
 add_executable(tst_toolbar tst_toolbar.cpp)
-
-target_link_libraries(tst_toolbar PRIVATE kdtoolbars Qt5::Widgets Qt5::Test)
+target_link_libraries(tst_toolbar kdtoolbars Qt5::Test)
+add_test(NAME tst_toolbar COMMAND $<TARGET_FILE:tst_toolbar>)

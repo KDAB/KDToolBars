@@ -24,6 +24,16 @@ find_package(
     REQUIRED
 )
 
+option(KDTOOLBARS_TESTS "Build tests" ON)
+option(KDTOOLBARS_EXAMPLES "Build examples" ON)
+
 add_subdirectory(src)
-add_subdirectory(example)
-add_subdirectory(tests)
+
+if(KDTOOLBARS_EXAMPLES)
+    add_subdirectory(example)
+endif()
+
+if(KDTOOLBARS_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
