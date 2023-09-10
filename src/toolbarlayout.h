@@ -101,6 +101,7 @@ private:
     LayoutType layoutType(bool floating, Qt::Orientation dockedOrientation) const;
 
     void updateGeometries() const;
+    void layoutRows(const std::vector<int> &rowBreaks) const;
     void initializeDynamicLayouts() const;
     const DynamicLayout *preferredLayoutForSize(const QSize &availableSize) const;
 

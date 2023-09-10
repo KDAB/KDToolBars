@@ -126,67 +126,6 @@ void ToolBarLayout::updateGeometries() const
     m_itemRows.clear();
 
     if (!m_items.empty()) {
-        auto layoutRows = [this](const std::vector<int> &rowBreaks) {
-            // figure out maximum row width
-            int rowStart = 0;
-            int maxRowWidth = 0;
-            for (auto rowEnd : rowBreaks) {
-                int rowWidth = 0;
-                Q_ASSERT(rowEnd > rowStart);
-                Q_ASSERT(rowStart >= 0 && rowEnd <= m_items.count());
-                int numItems = 0;
-                for (int i = rowStart; i < rowEnd; ++i) {
-                    rowWidth += m_items[i]->sizeHint().width();
-                    numItems++;
-                }
-
-                // add room for spacing in between items
-                rowWidth += spacing() * (numItems - 1);
-                maxRowWidth = std::max(maxRowWidth, rowWidth);
-                rowStart = rowEnd;
-            }
-            // lay out items in rows
-            rowStart = 0;
-            int rowIndex = 0;
-            QPoint rowPos;
-            for (auto rowEnd : rowBreaks) {
-                int rowHeight = 0;
-                rowIndex++;
-                for (int i = rowStart; i < rowEnd; ++i) {
-                    rowHeight = std::max(rowHeight, m_items[i]->sizeHint().height());
-                }
-
-                auto pos = rowPos;
-                ItemRow row;
-                row.height = rowHeight;
-                for (int i = rowStart; i < rowEnd; ++i) {
-                    auto *item = m_items[i];
-                    auto size = QSize(item->sizeHint().width(), rowHeight);
-                    auto *separator = qobject_cast<ToolBarSeparator *>(item->widget());
-                    if (separator != nullptr) {
-                        if (i == rowStart && rowStart == rowEnd - 1) {
-                            // row with a single separator spanning the full width, make separator horizontal
-                            separator->setOrientation(Qt::Vertical);
-                            size = QSize(maxRowWidth, item->sizeHint().height());
-                        } else {
-                            separator->setOrientation(Qt::Horizontal);
-                        }
-                    }
-                    row.items.push_back(ItemRow::Item { item, QRect(pos, size) });
-                    // add room for spacing between items
-                    int spaceBetween = (i < rowEnd - 1) ? spacing() : 0;
-                    pos.rx() += item->sizeHint().width() + spaceBetween;
-                }
-                m_itemRows.push_back(std::move(row));
-                // add room for spacing in between rows
-                int spaceBetween = (rowIndex < rowBreaks.size()) ? spacing() : 0;
-                rowPos.ry() += rowHeight + spaceBetween;
-                rowStart = rowEnd;
-            }
-
-            m_contentsSize = QSize(maxRowWidth, rowPos.y());
-        };
-
         switch (layoutType()) {
         case LayoutType::Vertical: {
             int rowWidth = 0;
@@ -260,6 +199,69 @@ void ToolBarLayout::updateGeometries() const
     }
 
     m_dirty = false;
+}
+
+
+void ToolBarLayout::layoutRows(const std::vector<int> &rowBreaks) const
+{
+    // figure out maximum row width
+    int rowStart = 0;
+    int maxRowWidth = 0;
+    for (auto rowEnd : rowBreaks) {
+        int rowWidth = 0;
+        Q_ASSERT(rowEnd > rowStart);
+        Q_ASSERT(rowStart >= 0 && rowEnd <= m_items.count());
+        int numItems = 0;
+        for (int i = rowStart; i < rowEnd; ++i) {
+            rowWidth += m_items[i]->sizeHint().width();
+            numItems++;
+        }
+
+        // add room for spacing in between items
+        rowWidth += spacing() * (numItems - 1);
+        maxRowWidth = std::max(maxRowWidth, rowWidth);
+        rowStart = rowEnd;
+    }
+    // lay out items in rows
+    rowStart = 0;
+    int rowIndex = 0;
+    QPoint rowPos;
+    for (auto rowEnd : rowBreaks) {
+        int rowHeight = 0;
+        rowIndex++;
+        for (int i = rowStart; i < rowEnd; ++i) {
+            rowHeight = std::max(rowHeight, m_items[i]->sizeHint().height());
+        }
+
+        auto pos = rowPos;
+        ItemRow row;
+        row.height = rowHeight;
+        for (int i = rowStart; i < rowEnd; ++i) {
+            auto *item = m_items[i];
+            auto size = QSize(item->sizeHint().width(), rowHeight);
+            auto *separator = qobject_cast<ToolBarSeparator *>(item->widget());
+            if (separator != nullptr) {
+                if (i == rowStart && rowStart == rowEnd - 1) {
+                    // row with a single separator spanning the full width, make separator horizontal
+                    separator->setOrientation(Qt::Vertical);
+                    size = QSize(maxRowWidth, item->sizeHint().height());
+                } else {
+                    separator->setOrientation(Qt::Horizontal);
+                }
+            }
+            row.items.push_back(ItemRow::Item { item, QRect(pos, size) });
+            // add room for spacing between items
+            int spaceBetween = (i < rowEnd - 1) ? spacing() : 0;
+            pos.rx() += item->sizeHint().width() + spaceBetween;
+        }
+        m_itemRows.push_back(std::move(row));
+        // add room for spacing in between rows
+        int spaceBetween = (rowIndex < rowBreaks.size()) ? spacing() : 0;
+        rowPos.ry() += rowHeight + spaceBetween;
+        rowStart = rowEnd;
+    }
+
+    m_contentsSize = QSize(maxRowWidth, rowPos.y());
 }
 
 void ToolBarLayout::setGeometry(const QRect &geometry)
