@@ -200,7 +200,7 @@ void ToolBar::Private::actionEvent(QActionEvent *event)
             Q_ASSERT(index != -1);
         }
         auto item = createWidgetForAction(action);
-        m_layout->InsertWidget(index, item.widget, item.type);
+        m_layout->insertWidget(index, item.widget, item.type);
         m_actionWidgets[action] = item;
         if (q->isFloating()) {
             item.widget->show();

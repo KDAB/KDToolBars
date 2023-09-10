@@ -339,7 +339,7 @@ void ToolBarLayout::setMinimumSize(const QSize &size)
     m_minimumSize = size;
 }
 
-void ToolBarLayout::InsertWidget(int index, QWidget *widget, ToolBarWidgetType type)
+void ToolBarLayout::insertWidget(int index, QWidget *widget, ToolBarWidgetType type)
 {
     addChildWidget(widget);
     auto *item = QLayoutPrivate::createWidgetItem(this, widget);
@@ -492,7 +492,7 @@ const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(
     return &m_dynamicLayouts.front();
 }
 
-ToolBarLayout::DropSite ToolBarLayout::FindDropSite(const QPoint &layoutPos) const
+ToolBarLayout::DropSite ToolBarLayout::findDropSite(const QPoint &layoutPos) const
 {
     if (m_dirty)
         updateGeometries();

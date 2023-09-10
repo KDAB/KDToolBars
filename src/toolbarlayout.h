@@ -47,7 +47,7 @@ public:
         Separator,
         CustomWidget,
     };
-    void InsertWidget(int index, QWidget *widget, ToolBarWidgetType type);
+    void insertWidget(int index, QWidget *widget, ToolBarWidgetType type);
     void setCloseButton(QWidget *widget);
 
     QSize preferredSizeForWidth(int width) const;
@@ -70,7 +70,7 @@ public:
         QPoint topLeft;
         int size = 0; // width if m_layoutType == LayoutType::Vertical, height otherwise
     };
-    DropSite FindDropSite(const QPoint &pos) const;
+    DropSite findDropSite(const QPoint &pos) const;
 
     // margins for contents excluding the title bar and handle
     QMargins innerContentsMargins() const;

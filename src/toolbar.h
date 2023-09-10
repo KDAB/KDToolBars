@@ -61,7 +61,7 @@ public:
 signals:
     void iconSizeChanged(const QSize &size);
     void toolButtonStyleChanged(const Qt::ToolButtonStyle style);
-    void topLevelChanged(bool is_top_level);
+    void topLevelChanged(bool isTopLevel);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
