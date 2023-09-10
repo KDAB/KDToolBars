@@ -441,7 +441,12 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
 {
     if (m_isDragging) {
         if (event->type() == QEvent::Enter) {
-            // eat the QEvent::Enter event if the object that got it is a child of a toolbar
+            // Sometimes toolbar buttons may get highlighted while we're dragging toolbars.
+            // This usually happens when the toolbar is getting docked or undocked and we
+            // temporarily lose mouse grab.
+            //
+            // Prevent this from happening by filtering out QEvent::Enter events on child
+            // widgets while dragging a toolbar.
             const auto isToolbarChild = [this, watched] {
                 auto *w = qobject_cast<QWidget *>(watched);
                 if (w == nullptr)
