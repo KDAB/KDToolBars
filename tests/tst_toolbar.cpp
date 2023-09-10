@@ -10,6 +10,8 @@
 
 #include <kdtoolbars/toolbar.h>
 
+#include <toolbarlayout.h>
+
 #include <QAction>
 #include <QLayout>
 #include <QProxyStyle>
@@ -99,11 +101,6 @@ void TestToolBars::testFloatingLayout()
     tb->layout()->setContentsMargins(kLayoutContentsMargin, kLayoutContentsMargin, kLayoutContentsMargin, kLayoutContentsMargin);
     tb->setSpacing(kSpacing);
 
-    // create a toolbar with some buttons
-    for (int i = 0; i < kButtonCount; ++i)
-        tb->addAction(new QAction(tb));
-    QCOMPARE(tb->layout()->count(), kButtonCount + 1);
-
     tb->show();
 
     const auto expectedSize = [](int rows, int columns) {
@@ -117,20 +114,29 @@ void TestToolBars::testFloatingLayout()
         return QSize(width, height);
     };
 
+    // create a toolbar with some buttons
+    for (int i = 0; i < kButtonCount; ++i)
+        tb->addAction(new QAction(tb));
+    QCOMPARE(tb->layout()->count(), kButtonCount + 1);
+
+    QApplication::processEvents(); // process QEvent::LayoutRequest or buttons will be hidden
+
+    auto *layout = static_cast<KDToolBars::ToolBarLayout *>(tb->layout());
+
     // are the icons laid out in a single row?
-    tb->resize(1000, 100);
-    QCOMPARE(tb->layout()->sizeHint(), expectedSize(1, kButtonCount));
+    layout->adjustToWidth(1000);
+    QCOMPARE(layout->sizeHint(), expectedSize(1, kButtonCount));
 
     // increase height to a bit more than the required height for two rows
-    tb->resize(1000, expectedSize(2, kButtonCount / 2).height() + 40);
+    layout->adjustToHeight(expectedSize(2, kButtonCount / 2).height() + 40);
 
     // are the icons laid out in two rows?
-    QCOMPARE(tb->layout()->sizeHint(), expectedSize(2, kButtonCount / 2));
+    QCOMPARE(layout->sizeHint(), expectedSize(2, kButtonCount / 2));
 
     // set column layout
     tb->setColumns(2);
     tb->setColumnLayout(true);
-    QCOMPARE(tb->layout()->sizeHint(), expectedSize(kButtonCount / tb->columns(), tb->columns()));
+    QCOMPARE(layout->sizeHint(), expectedSize(kButtonCount / tb->columns(), tb->columns()));
 
     // create a toolbar with a separator between the buttons
     tb->clear();
@@ -140,17 +146,19 @@ void TestToolBars::testFloatingLayout()
     tb->addSeparator();
     for (int i = 0; i < kButtonCount / 2; ++i)
         tb->addAction(new QAction(tb));
-    QCOMPARE(tb->layout()->count(), kButtonCount + 2);
+    QCOMPARE(layout->count(), kButtonCount + 2);
+
+    QApplication::processEvents(); // process QEvent::LayoutRequest or buttons will be hidden
 
     // are the icons laid out in a single row with a vertical separator?
-    tb->resize(1000, 100);
-    QCOMPARE(tb->layout()->sizeHint(), expectedSize(1, kButtonCount) + QSize(kSeparatorSize + kSpacing, 0));
+    layout->adjustToWidth(1000);
+    QCOMPARE(layout->sizeHint(), expectedSize(1, kButtonCount) + QSize(kSeparatorSize + kSpacing, 0));
 
     // increase height to a bit more than the required height for two rows
-    tb->resize(1000, expectedSize(2, kButtonCount / 2).height() + 40);
+    layout->adjustToHeight(expectedSize(2, kButtonCount / 2).height() + 40);
 
     // are the icons laid out in two rows with an horizontal separator between them?
-    QCOMPARE(tb->layout()->sizeHint(), expectedSize(2, kButtonCount / 2) + QSize(0, kSeparatorSize + kSpacing));
+    QCOMPARE(layout->sizeHint(), expectedSize(2, kButtonCount / 2) + QSize(0, kSeparatorSize + kSpacing));
 
     delete tb;
 }

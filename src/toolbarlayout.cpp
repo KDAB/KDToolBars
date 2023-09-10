@@ -249,18 +249,11 @@ void ToolBarLayout::updateGeometries() const
             break;
         }
         case LayoutType::Dynamic: {
-            if (m_rowBreaks.empty()) {
-                if (m_availableSize.isValid()) {
-                    initializeDynamicLayouts();
-                    auto *layout = preferredLayoutForSize(m_availableSize);
-                    if (layout != nullptr) {
-                        m_rowBreaks = layout->rowBreaks;
-                    }
-                }
-            }
-            if (!m_rowBreaks.empty()) {
+            initializeDynamicLayouts();
+            if (m_rowBreaks.empty())
+                m_rowBreaks = m_dynamicLayouts.front().rowBreaks;
+            if (!m_rowBreaks.empty())
                 layoutRows(m_rowBreaks);
-            }
             break;
         }
         }
@@ -273,23 +266,12 @@ void ToolBarLayout::setGeometry(const QRect &geometry)
 {
     QLayout::setGeometry(geometry);
 
-    m_geometry = geometry;
-    const auto contentsRect = geometry.marginsRemoved(innerContentsMargins());
-    const auto availableSize = contentsRect.size();
-    const auto sizeChanged = availableSize != m_availableSize;
-    m_availableSize = availableSize;
-
-    if (layoutType() == LayoutType::Dynamic) {
-        if (sizeChanged) {
-            // lay out the widgets in rows with approximately the same width
-            m_rowBreaks.clear();
-            invalidate();
-        }
-    }
-    if (m_dirty) {
+    if (m_dirty)
         updateGeometries();
-    }
 
+    m_geometry = geometry;
+
+    const auto contentsRect = geometry.marginsRemoved(innerContentsMargins());
     const auto contentsTopLeft = contentsRect.topLeft();
     for (const auto &row : m_itemRows) {
         for (auto &item : row.items)
@@ -451,7 +433,7 @@ void ToolBarLayout::initializeDynamicLayouts() const
     // now find out where to insert row breaks so we have rows with approximately
     // the same width
     for (int rows = 1; rows <= itemCount; ++rows) {
-        const auto layout = cache[0][rows];
+        auto layout = cache[0][rows];
         if (!layout)
             continue;
 
@@ -631,11 +613,14 @@ QRect ToolBarLayout::handleArea() const
     return {};
 }
 
-QSize ToolBarLayout::preferredSizeForWidth(int width) const
+QSize ToolBarLayout::adjustToWidth(int width)
 {
-    const auto contentsSize = [this, width] {
-        if (m_dynamicLayouts.empty())
-            return QSize(0, 0);
+    if (m_dirty)
+        initializeDynamicLayouts();
+    if (m_dynamicLayouts.empty())
+        return QSize(0, 0);
+    const auto &layout = [this, width]() -> const DynamicLayout & {
+        Q_ASSERT(!m_dynamicLayouts.empty());
         int left, top, right, bottom;
         getContentsMargins(&left, &top, &right, &bottom);
         int availableWidth = width - (left + right);
@@ -643,18 +628,26 @@ QSize ToolBarLayout::preferredSizeForWidth(int width) const
             const auto &layout = m_dynamicLayouts[i];
             const auto &size = layout.minimumSize;
             if (size.width() <= availableWidth)
-                return size;
+                return layout;
         }
-        return m_dynamicLayouts.back().minimumSize;
+        return m_dynamicLayouts.back();
     }();
+    if (layout.rowBreaks != m_rowBreaks) {
+        m_rowBreaks = layout.rowBreaks;
+        invalidate();
+    }
+    const auto contentsSize = layout.minimumSize;
     return contentsSize.expandedTo(m_minimumSize).grownBy(innerContentsMargins());
 }
 
-QSize ToolBarLayout::preferredSizeForHeight(int height) const
+QSize ToolBarLayout::adjustToHeight(int height)
 {
-    const auto contentsSize = [this, height] {
-        if (m_dynamicLayouts.empty())
-            return QSize(0, 0);
+    if (m_dirty)
+        initializeDynamicLayouts();
+    if (m_dynamicLayouts.empty())
+        return QSize(0, 0);
+    const auto &layout = [this, height]() -> const DynamicLayout & {
+        Q_ASSERT(!m_dynamicLayouts.empty());
         int left, top, right, bottom;
         getContentsMargins(&left, &top, &right, &bottom);
         int availableHeight = height - (top + bottom + titleHeight());
@@ -662,10 +655,15 @@ QSize ToolBarLayout::preferredSizeForHeight(int height) const
             const auto &layout = m_dynamicLayouts[i];
             const auto &size = layout.minimumSize;
             if (size.height() <= availableHeight)
-                return size;
+                return layout;
         }
-        return m_dynamicLayouts.front().minimumSize;
+        return m_dynamicLayouts.front();
     }();
+    if (layout.rowBreaks != m_rowBreaks) {
+        m_rowBreaks = layout.rowBreaks;
+        invalidate();
+    }
+    const auto contentsSize = layout.minimumSize;
     return contentsSize.expandedTo(m_minimumSize).grownBy(innerContentsMargins());
 }
 

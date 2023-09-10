@@ -80,6 +80,7 @@ void ToolBar::Private::init()
 
     m_layout = new ToolBarLayout(q, q);
     m_layout->setContentsMargins(4, 4, 4, 4);
+    m_layout->setSizeConstraint(QLayout::SetFixedSize);
 
     auto updateMinimumHeight = [this] {
         // Set the minimum height to the height of a tool button
@@ -153,34 +154,39 @@ void ToolBar::Private::dragMargin(const QPoint &p)
     const auto contentsMargins = q->contentsMargins();
     switch (m_resizeMargin) {
     case Margin::Left: {
-        const auto topRight = geometry.topRight();
         const int width = geometry.right() - p.x() + 1;
-        geometry.setSize(m_layout->preferredSizeForWidth(width).grownBy(contentsMargins));
-        geometry.moveTopRight(topRight);
+        const auto contents_size = m_layout->adjustToWidth(width);
+        const auto updated_size = contents_size.grownBy(contentsMargins);
+        if (updated_size.width() != geometry.width()) {
+            const auto offset = geometry.width() - updated_size.width();
+            q->move(geometry.x() + offset, geometry.y());
+        }
         break;
     }
     case Margin::Right: {
         const int width = p.x() - geometry.left() + 1;
-        geometry.setSize(m_layout->preferredSizeForWidth(width).grownBy(contentsMargins));
+        m_layout->adjustToWidth(width);
         break;
     }
     case Margin::Top: {
-        const auto bottomLeft = geometry.bottomLeft();
         const auto height = geometry.bottom() - p.y() + 1;
-        geometry.setSize(m_layout->preferredSizeForHeight(height).grownBy(contentsMargins));
-        geometry.moveBottomLeft(bottomLeft);
+        const auto contents_size = m_layout->adjustToHeight(height);
+        const auto updated_size = contents_size.grownBy(contentsMargins);
+        if (updated_size.height() != geometry.height()) {
+            const auto offset = geometry.height() - updated_size.height();
+            q->move(geometry.x(), geometry.y() + offset);
+        }
         break;
     }
     case Margin::Bottom: {
         const auto height = p.y() - geometry.top() + 1;
-        geometry.setSize(m_layout->preferredSizeForHeight(height).grownBy(contentsMargins));
+        m_layout->adjustToHeight(height);
         break;
     }
     case Margin::None:
         Q_ASSERT(false);
         break;
     }
-    q->setGeometry(geometry);
 }
 
 QWidget *ToolBar::Private::widgetForAction(const QAction *action) const
@@ -202,10 +208,6 @@ void ToolBar::Private::actionEvent(QActionEvent *event)
         auto item = createWidgetForAction(action);
         m_layout->insertWidget(index, item.widget, item.type);
         m_actionWidgets[action] = item;
-        if (q->isFloating()) {
-            item.widget->show();
-            q->resize(m_layout->sizeHint().grownBy(q->contentsMargins()));
-        }
         break;
     }
     case QEvent::ActionChanged: {
@@ -223,10 +225,6 @@ void ToolBar::Private::actionEvent(QActionEvent *event)
                 widgetAction->releaseWidget(item.widget);
         } else {
             delete item.widget;
-        }
-        if (q->isFloating()) {
-            m_layout->invalidate();
-            q->resize(m_layout->sizeHint().grownBy(q->contentsMargins()));
         }
         break;
     }

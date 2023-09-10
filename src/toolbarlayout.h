@@ -50,8 +50,8 @@ public:
     void insertWidget(int index, QWidget *widget, ToolBarWidgetType type);
     void setCloseButton(QWidget *widget);
 
-    QSize preferredSizeForWidth(int width) const;
-    QSize preferredSizeForHeight(int height) const;
+    QSize adjustToWidth(int width);
+    QSize adjustToHeight(int height);
 
     void addItem(QLayoutItem *item) override;
     int count() const override;
@@ -124,7 +124,6 @@ private:
     mutable std::vector<DynamicLayout> m_dynamicLayouts;
     mutable std::vector<int> m_rowBreaks;
     QRect m_geometry;
-    QSize m_availableSize;
     QSize m_minimumSize;
 };
 
