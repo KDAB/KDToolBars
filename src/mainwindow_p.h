@@ -24,6 +24,7 @@ public:
     MainWindow *const q;
     QWidget *m_container;
     ToolBarContainerLayout *m_layout;
+    bool m_customizingToolBars = false;
 };
 
 } // namespace KDToolBars

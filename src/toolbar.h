@@ -62,11 +62,17 @@ signals:
     void iconSizeChanged(const QSize &size);
     void toolButtonStyleChanged(const Qt::ToolButtonStyle style);
     void topLevelChanged(bool isTopLevel);
+    void changed();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
     void actionEvent(QActionEvent *event) override;
     bool event(QEvent *event) override;
+    void childEvent(QChildEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
     void updateIconSize(const QSize &size);
     void updateToolButtonStyle(Qt::ToolButtonStyle style);

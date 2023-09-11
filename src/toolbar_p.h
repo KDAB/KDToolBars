@@ -13,9 +13,20 @@
 #include "toolbar.h"
 #include "toolbarlayout.h"
 
+#include <QMimeData>
+
 #include <unordered_map>
 
 namespace KDToolBars {
+
+class DropIndicator;
+
+class ToolbarActionMimeData : public QMimeData
+{
+    Q_OBJECT
+public:
+    QAction *action;
+};
 
 class ToolBar::Private : public QObject
 {
@@ -43,6 +54,10 @@ public:
     bool mouseReleaseEvent(const QMouseEvent *me);
     bool mouseDoubleClickEvent(const QMouseEvent *me);
     bool hoverMoveEvent(const QHoverEvent *me);
+    void dragEnterEvent(QDragEnterEvent *e);
+    void dragMoveEvent(QDragMoveEvent *e);
+    void dragLeaveEvent(QDragLeaveEvent *e);
+    void dropEvent(QDropEvent *e);
 
     QRect titleArea() const;
     QRect handleArea() const;
@@ -71,7 +86,8 @@ public:
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
-    QWidget *widgetForAction(const QAction *action) const;
+    QWidget *widgetForAction(QAction *action) const;
+    QAction *actionForWidget(QWidget *widget) const;
 
     struct ActionWidget
     {
@@ -80,11 +96,15 @@ public:
     };
     ActionWidget createWidgetForAction(QAction *action);
 
+    QRect actionRect(QAction *action) const;
+    bool updateDropIndicatorGeometry(QPoint pos);
+    bool canCustomize() const;
+
     ToolBar *const q;
     bool m_columnLayout = false;
     ToolBarLayout *m_layout = nullptr;
     QToolButton *m_closeButton = nullptr;
-    std::unordered_map<const QAction *, ActionWidget> m_actionWidgets;
+    std::unordered_map<QAction *, ActionWidget> m_actionWidgets;
     bool m_isDragging = false;
     QPoint m_dragPos;
     QPoint m_initialDragPos;
@@ -95,6 +115,7 @@ public:
     bool m_explicitToolButtonStyle = false;
     Qt::Orientation m_dockedOrientation = Qt::Horizontal;
     ToolBarTrays m_allowedTrays = ToolBarTray::All;
+    DropIndicator *m_dropIndicator = nullptr;
 };
 
 } // namespace KDToolBars

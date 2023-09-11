@@ -19,6 +19,7 @@
 
 #include <QActionEvent>
 #include <QApplication>
+#include <QDrag>
 #include <QPainter>
 #include <QStyle>
 #include <QStyleOption>
@@ -39,7 +40,7 @@ MainWindow *mainWindow(const ToolBar *tb)
 {
     auto *w = tb->parentWidget();
     while (w != nullptr) {
-        if (auto *mw = qobject_cast<MainWindow *>(w); mw != nullptr)
+        if (auto *mw = qobject_cast<MainWindow *>(w))
             return mw;
         w = w->parentWidget();
     }
@@ -55,6 +56,27 @@ QIcon buttonIcon(const QString &iconName)
     return icon;
 }
 } // namespace
+
+namespace KDToolBars {
+
+class DropIndicator : public QWidget
+{
+public:
+    explicit DropIndicator(QWidget *parent = nullptr)
+        : QWidget(parent)
+    {
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        // TODO: not sure how this should look like, just paint a black rectangle for now
+        QPainter painter(this);
+        painter.fillRect(rect(), Qt::black);
+    }
+};
+
+}
 
 ToolBar::Private::Private(ToolBar *toolbar)
     : q(toolbar)
@@ -113,6 +135,11 @@ void ToolBar::Private::init()
     m_closeButton->setIcon(buttonIcon(QStringLiteral("close")));
     QObject::connect(m_closeButton, &QAbstractButton::clicked, q, &QWidget::close);
     m_layout->setCloseButton(m_closeButton);
+
+    m_dropIndicator = new DropIndicator(q);
+    m_dropIndicator->hide();
+
+    q->setAcceptDrops(true);
 }
 
 ToolBar::Private::Margin ToolBar::Private::marginAt(const QPoint &p) const
@@ -189,10 +216,19 @@ void ToolBar::Private::dragMargin(const QPoint &p)
     }
 }
 
-QWidget *ToolBar::Private::widgetForAction(const QAction *action) const
+QWidget *ToolBar::Private::widgetForAction(QAction *action) const
 {
     auto it = m_actionWidgets.find(action);
     return it != m_actionWidgets.end() ? it->second.widget : nullptr;
+}
+
+QAction *ToolBar::Private::actionForWidget(QWidget *widget) const
+{
+    auto it = std::find_if(m_actionWidgets.begin(), m_actionWidgets.end(),
+                           [widget](const auto &item) {
+                               return item.second.widget == widget;
+                           });
+    return it != m_actionWidgets.end() ? it->first : nullptr;
 }
 
 void ToolBar::Private::actionEvent(QActionEvent *event)
@@ -350,6 +386,111 @@ bool ToolBar::Private::hoverMoveEvent(const QHoverEvent *he)
     return true;
 }
 
+void ToolBar::Private::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (!canCustomize())
+        return;
+    if (!qobject_cast<const ToolbarActionMimeData *>(e->mimeData()))
+        return;
+    m_dropIndicator->show();
+    updateDropIndicatorGeometry(e->pos());
+    m_dropIndicator->raise();
+    e->acceptProposedAction();
+}
+
+void ToolBar::Private::dragMoveEvent(QDragMoveEvent *e)
+{
+    if (!qobject_cast<const ToolbarActionMimeData *>(e->mimeData()))
+        return;
+    if (updateDropIndicatorGeometry(e->pos())) {
+        e->acceptProposedAction();
+    } else {
+        e->ignore();
+    }
+}
+
+QRect ToolBar::Private::actionRect(QAction *action) const
+{
+    const QWidget *w = widgetForAction(action);
+    Q_ASSERT(w);
+    return QRect(w->mapTo(q, QPoint(0, 0)), w->size());
+}
+
+bool ToolBar::Private::updateDropIndicatorGeometry(QPoint pos)
+{
+    const auto drop_site = m_layout->findDropSite(pos);
+    if (drop_site.itemIndex == -1) {
+        m_dropIndicator->hide();
+        return false;
+    }
+
+    const QRect geometry = [this, drop_site] {
+        QPoint position = drop_site.topLeft;
+        constexpr auto kMargin = 4;
+        constexpr auto kWidth = 2;
+        const auto vertical =
+            q->isFloating() || q->columnLayout() || q->dockedOrientation() == Qt::Horizontal;
+        if (vertical) {
+            return QRect(
+                position + QPoint(-kWidth / 2, kMargin), QSize(kWidth, drop_site.size - 2 * kMargin));
+        } else {
+            return QRect(position + QPoint(kMargin, kWidth / 2), QSize(drop_site.size - 2 * kMargin, 2));
+        }
+    }();
+    m_dropIndicator->show();
+    m_dropIndicator->setGeometry(geometry);
+    m_dropIndicator->raise();
+
+    return true;
+}
+
+void ToolBar::Private::dragLeaveEvent(QDragLeaveEvent *)
+{
+    m_dropIndicator->hide();
+}
+
+void ToolBar::Private::dropEvent(QDropEvent *e)
+{
+    m_dropIndicator->hide();
+
+    auto *sourceToolbar = qobject_cast<ToolBar *>(e->source());
+    if (!sourceToolbar)
+        return;
+
+    auto *data = qobject_cast<const ToolbarActionMimeData *>(e->mimeData());
+    if (!data)
+        return;
+    QAction *actionToInsert = data->action;
+
+    const auto dropSite = m_layout->findDropSite(e->pos());
+    const auto position = dropSite.itemIndex;
+
+    const auto actions = q->actions();
+    QAction *beforeAction = position < actions.count() ? actions[position] : nullptr;
+
+    if (e->dropAction() == Qt::MoveAction) {
+        if (beforeAction != actionToInsert) {
+            sourceToolbar->removeAction(actionToInsert);
+            emit sourceToolbar->changed();
+
+            q->insertAction(beforeAction, actionToInsert);
+            emit q->changed();
+        }
+    } else {
+        q->insertAction(beforeAction, actionToInsert);
+        emit q->changed();
+    }
+
+    e->acceptProposedAction();
+}
+
+bool ToolBar::Private::canCustomize() const
+{
+    auto *mw = mainWindow(q);
+    Q_ASSERT(mw);
+    return mw->isCustomizingToolBars();
+}
+
 QRect ToolBar::Private::titleArea() const
 {
     return m_layout->titleArea().translated(q->contentsRect().topLeft());
@@ -461,7 +602,60 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
             }();
             return isToolbarChild;
         }
+        return false;
     }
+
+    QWidget *sourceWidget = qobject_cast<QWidget *>(watched);
+    if (!sourceWidget)
+        return false;
+
+    QAction *sourceAction = actionForWidget(sourceWidget);
+    if (!sourceAction)
+        return false;
+
+    switch (event->type()) {
+    case QEvent::MouseButtonPress: {
+        auto *me = static_cast<QMouseEvent *>(event);
+        if (canCustomize() && me->button() == Qt::LeftButton) {
+            // We're customizing toolbars, start dragging this action
+            QDrag *drag = new QDrag(q);
+            {
+                QPixmap iconPixmap(sourceWidget->size());
+                QPainter painter(&iconPixmap);
+                sourceWidget->render(&painter);
+                drag->setPixmap(iconPixmap);
+            }
+            auto *data = new ToolbarActionMimeData;
+            data->action = sourceAction;
+            drag->setMimeData(data);
+            const Qt::DropAction dropAction = drag->exec(Qt::MoveAction | Qt::CopyAction);
+            if (dropAction == Qt::IgnoreAction) {
+                // Action was dropped outside a toolbar, delete it
+                q->removeAction(sourceAction);
+                emit q->changed();
+            }
+            return true;
+        }
+        break;
+    }
+    case QEvent::MouseButtonRelease:
+    case QEvent::MouseButtonDblClick:
+    case QEvent::MouseMove: {
+        // Ignore mouse events while customizing toolbars
+        if (canCustomize())
+            return true;
+        break;
+    }
+    case QEvent::ToolTip: {
+        // Don't display tooltips while customizing toolbars
+        if (canCustomize())
+            return true;
+        break;
+    }
+    default:
+        break;
+    }
+
     return false;
 }
 
@@ -592,6 +786,35 @@ bool ToolBar::event(QEvent *event)
         break;
     }
     return QWidget::event(event);
+}
+
+void ToolBar::childEvent(QChildEvent *e)
+{
+    QObject *child = e->child();
+    if (e->type() == QEvent::ChildAdded && child->isWidgetType()) {
+        child->installEventFilter(d);
+    }
+    QFrame::childEvent(e);
+}
+
+void ToolBar::dragEnterEvent(QDragEnterEvent *e)
+{
+    d->dragEnterEvent(e);
+}
+
+void ToolBar::dragMoveEvent(QDragMoveEvent *e)
+{
+    d->dragMoveEvent(e);
+}
+
+void ToolBar::dragLeaveEvent(QDragLeaveEvent *e)
+{
+    d->dragLeaveEvent(e);
+}
+
+void ToolBar::dropEvent(QDropEvent *e)
+{
+    d->dropEvent(e);
 }
 
 bool ToolBar::columnLayout() const

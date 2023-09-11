@@ -65,18 +65,22 @@ int main(int argc, char *argv[])
 
     auto *iconSize = new QCheckBox(QObject::tr("Large icons"), centralWidget);
     layout->addWidget(iconSize);
-
     QObject::connect(iconSize, &QCheckBox::toggled, &mw, [&mw](bool checked) {
         const QSize size = checked ? QSize(64, 64) : QSize(32, 32);
         mw.setIconSize(size);
     });
 
-    auto *button_style = new QCheckBox(QObject::tr("Button style"), centralWidget);
-    layout->addWidget(button_style);
-
-    QObject::connect(button_style, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
+    auto *buttonStyle = new QCheckBox(QObject::tr("Button style"), centralWidget);
+    layout->addWidget(buttonStyle);
+    QObject::connect(buttonStyle, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
         const Qt::ToolButtonStyle style = checked ? Qt::ToolButtonTextOnly : Qt::ToolButtonIconOnly;
         mw.setToolButtonStyle(style);
+    });
+
+    auto *customization = new QCheckBox(QObject::tr("Customization"), centralWidget);
+    layout->addWidget(customization);
+    QObject::connect(customization, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
+        mw.setCustomizingToolBars(checked);
     });
 
     layout->addStretch();

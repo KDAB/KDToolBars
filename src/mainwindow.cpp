@@ -107,3 +107,16 @@ bool MainWindow::restoreToolBarState(const QByteArray &state)
     QDataStream stream(&data, QIODevice::ReadOnly);
     return d->m_layout->restoreState(stream);
 }
+
+bool MainWindow::isCustomizingToolBars() const
+{
+    return d->m_customizingToolBars;
+}
+
+void MainWindow::setCustomizingToolBars(bool customizing)
+{
+    if (d->m_customizingToolBars == customizing)
+        return;
+    d->m_customizingToolBars = customizing;
+    emit customizingToolBarsChanged(customizing);
+}

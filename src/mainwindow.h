@@ -47,6 +47,12 @@ public:
     QByteArray saveToolBarState() const;
     bool restoreToolBarState(const QByteArray &state);
 
+    bool isCustomizingToolBars() const;
+    void setCustomizingToolBars(bool customizing);
+
+signals:
+    void customizingToolBarsChanged(bool customizing);
+
 private:
     friend class ToolBar;
 
