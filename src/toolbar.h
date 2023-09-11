@@ -62,7 +62,7 @@ signals:
     void iconSizeChanged(const QSize &size);
     void toolButtonStyleChanged(const Qt::ToolButtonStyle style);
     void isFloatingChanged(bool isFloating);
-    void changed();
+    void actionsCustomized();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

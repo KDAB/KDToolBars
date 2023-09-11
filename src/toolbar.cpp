@@ -471,14 +471,14 @@ void ToolBar::Private::dropEvent(QDropEvent *e)
     if (e->dropAction() == Qt::MoveAction) {
         if (beforeAction != actionToInsert) {
             sourceToolbar->removeAction(actionToInsert);
-            emit sourceToolbar->changed();
+            emit sourceToolbar->actionsCustomized();
 
             q->insertAction(beforeAction, actionToInsert);
-            emit q->changed();
+            emit q->actionsCustomized();
         }
     } else {
         q->insertAction(beforeAction, actionToInsert);
-        emit q->changed();
+        emit q->actionsCustomized();
     }
 
     e->acceptProposedAction();
@@ -632,7 +632,7 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
             if (dropAction == Qt::IgnoreAction) {
                 // Action was dropped outside a toolbar, delete it
                 q->removeAction(sourceAction);
-                emit q->changed();
+                emit q->actionsCustomized();
             }
             return true;
         }
