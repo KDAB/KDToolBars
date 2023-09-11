@@ -39,10 +39,10 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    auto *tb1 = makeToolBar("toolbar 1", { "gvim.png", "firefox.png", "gerbera.png", nullptr, "orca.png", "gimp.png", "firefox.png" });
-    auto *tb2 = makeToolBar("toolbar 2", { "orca.png", "gimp.png" });
-    auto *tb3 = makeToolBar("toolbar 3", { "firefox.png", "firefox.png", "firefox.png" });
-    auto *tb4 = makeToolBar("toolbar 4", { "gvim.png", "gvim.png", "gvim.png" });
+    auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" });
+    auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" });
+    auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" });
+    auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" });
 
     MainWindow mw;
     mw.setWindowTitle(QObject::tr("KDToolBars example"));
@@ -75,12 +75,6 @@ int main(int argc, char *argv[])
     QObject::connect(buttonStyle, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
         const Qt::ToolButtonStyle style = checked ? Qt::ToolButtonTextOnly : Qt::ToolButtonIconOnly;
         mw.setToolButtonStyle(style);
-    });
-
-    auto *customization = new QCheckBox(QObject::tr("Customization"), centralWidget);
-    layout->addWidget(customization);
-    QObject::connect(customization, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
-        mw.setCustomizingToolBars(checked);
     });
 
     layout->addStretch();

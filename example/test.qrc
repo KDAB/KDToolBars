@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>gvim.png</file>
-        <file>firefox.png</file>
-        <file>gerbera.png</file>
-        <file>gimp.png</file>
-        <file>orca.png</file>
-    </qresource>
-</RCC>

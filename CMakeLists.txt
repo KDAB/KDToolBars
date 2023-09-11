@@ -30,7 +30,7 @@ option(KDTOOLBARS_EXAMPLES "Build examples" ON)
 add_subdirectory(src)
 
 if(KDTOOLBARS_EXAMPLES)
-    add_subdirectory(example)
+    add_subdirectory(examples)
 endif()
 
 if(KDTOOLBARS_TESTS)

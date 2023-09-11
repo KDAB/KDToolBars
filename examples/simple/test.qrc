@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="coffee">../icons/coffee.svg</file>
+        <file alias="globe">../icons/globe.svg</file>
+        <file alias="sun">../icons/sun.svg</file>
+        <file alias="moon">../icons/moon.svg</file>
+        <file alias="cloud">../icons/cloud.svg</file>
+        <file alias="cloud-rain">../icons/cloud-rain.svg</file>
+        <file alias="arrow-left">../icons/arrow-left.svg</file>
+        <file alias="arrow-right">../icons/arrow-right.svg</file>
+        <file alias="arrow-up">../icons/arrow-up.svg</file>
+        <file alias="arrow-down">../icons/arrow-down.svg</file>
+        <file alias="upload">../icons/upload.svg</file>
+        <file alias="download">../icons/download.svg</file>
+        <file alias="file">../icons/file.svg</file>
+        <file alias="folder">../icons/folder.svg</file>
+        <file alias="image">../icons/image.svg</file>
+        <file alias="music">../icons/music.svg</file>
+        <file alias="video">../icons/video.svg</file>
+        <file alias="file-text">../icons/file-text.svg</file>
+        <file alias="star">../icons/star.svg</file>
+        <file alias="feather">../icons/feather.svg</file>
+    </qresource>
+</RCC>
