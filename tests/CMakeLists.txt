@@ -12,6 +12,14 @@ find_package(
     REQUIRED
 )
 
-add_executable(tst_toolbar tst_toolbar.cpp)
-target_link_libraries(tst_toolbar kdtoolbars Qt5::Test)
-add_test(NAME tst_toolbar COMMAND $<TARGET_FILE:tst_toolbar>)
+function(add_kdtoolbars_test NAME SOURCES)
+    set(TARGET_NAME test_kdtoolbars_${NAME})
+    add_executable(${TARGET_NAME} ${SOURCES})
+
+    target_link_libraries(${TARGET_NAME} kdtoolbars Qt5::Test)
+
+    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
+endfunction()
+
+add_kdtoolbars_test(toolbar tst_toolbar.cpp)
+add_kdtoolbars_test(mainwindow tst_mainwindow.cpp)

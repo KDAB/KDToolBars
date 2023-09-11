@@ -52,10 +52,19 @@ public:
     void adjustToolBarRow(const ToolBar *toolbar);
     void hoverToolBar(ToolBar *toolbar);
 
+    int toolBarCount() const;
+    ToolBar *toolBarAt(int index) const;
+
     ToolBarTrayLayout *toolBarTray(const ToolBar *toolbar) const;
 
     void saveState(QDataStream &stream) const;
     bool restoreState(QDataStream &stream);
+
+signals:
+    void toolBarAboutToBeInserted(const ToolBar* toolbar, int index);
+    void toolBarInserted(const ToolBar* toolbar);
+    void toolBarAboutToBeRemoved(const ToolBar* toolbar, int index);
+    void toolBarRemoved();
 
 private:
     enum TrayPosition {
@@ -67,6 +76,7 @@ private:
     };
     int trayIndex(ToolBarTray tray) const;
     std::array<ToolBarTrayLayout *, TrayCount> m_trays;
+    std::vector<ToolBar *> m_toolbars;
     std::unordered_map<const ToolBar *, ToolBarTrayLayout *> m_toolbarTray;
     QLayoutItem *m_centralWidget = nullptr;
 

@@ -44,6 +44,11 @@ public:
     void insertToolBarBreak(ToolBar *before);
     void removeToolBar(ToolBar *toolbar);
 
+    ToolBarTray toolBarTray(const ToolBar *toolbar) const;
+
+    int toolBarCount() const;
+    ToolBar *toolBarAt(int index) const;
+
     QByteArray saveToolBarState() const;
     bool restoreToolBarState(const QByteArray &state);
 
@@ -52,6 +57,10 @@ public:
 
 signals:
     void customizingToolBarsChanged(bool customizing);
+    void toolBarAboutToBeInserted(const ToolBar* toolbar, int index);
+    void toolBarInserted(const ToolBar* toolbar);
+    void toolBarAboutToBeRemoved(const ToolBar* toolbar, int index);
+    void toolBarRemoved();
 
 private:
     friend class ToolBar;

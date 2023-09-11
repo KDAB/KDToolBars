@@ -192,25 +192,35 @@ void ToolBarContainerLayout::addToolBar(ToolBarTray tray, ToolBar *toolbar)
     if (trayIndex == -1)
         return;
 
+    emit toolBarAboutToBeInserted(toolbar, m_toolbars.size());
+
     addChildWidget(toolbar);
 
+    m_toolbars.push_back(toolbar);
     auto *trayLayout = m_trays[trayIndex];
     m_toolbarTray[toolbar] = trayLayout;
     trayLayout->insertToolBar(nullptr, toolbar);
 
     invalidate();
+
+    emit toolBarInserted(toolbar);
 }
 
 void ToolBarContainerLayout::insertToolBar(ToolBar *before, ToolBar *toolbar)
 {
+    emit toolBarAboutToBeInserted(toolbar, m_toolbars.size());
+
     addChildWidget(toolbar);
 
+    m_toolbars.push_back(toolbar);
     auto *trayLayout = toolBarTray(before);
     Q_ASSERT(trayLayout);
     m_toolbarTray[toolbar] = trayLayout;
     trayLayout->insertToolBar(before, toolbar);
 
     invalidate();
+
+    emit toolBarInserted(toolbar);
 }
 
 void ToolBarContainerLayout::addToolBarBreak(ToolBarTray tray)
@@ -277,7 +287,19 @@ ToolBarTrayLayout *ToolBarContainerLayout::toolBarTray(const ToolBar *toolbar) c
 
 void ToolBarContainerLayout::removeToolBar(ToolBar *toolbar)
 {
+    auto it = std::find(m_toolbars.begin(), m_toolbars.end(), toolbar);
+    if (it == m_toolbars.end())
+        return;
+
+    const auto index = static_cast<int>(std::distance(m_toolbars.begin(), it));
+    emit toolBarAboutToBeRemoved(toolbar, index);
+
     removeWidget(toolbar);
+
+    m_toolbars.erase(it);
+    m_toolbarTray.erase(toolbar);
+
+    emit toolBarRemoved();
 }
 
 int ToolBarContainerLayout::trayIndex(ToolBarTray tray) const
@@ -358,4 +380,16 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
     invalidate();
 
     return true;
+}
+
+int ToolBarContainerLayout::toolBarCount() const
+{
+    return static_cast<int>(m_toolbars.size());
+}
+
+ToolBar *ToolBarContainerLayout::toolBarAt(int index) const
+{
+    if (index < 0 || index >= m_toolbars.size())
+        return nullptr;
+    return m_toolbars[index];
 }

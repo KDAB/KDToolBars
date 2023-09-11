@@ -13,6 +13,7 @@
 #include "mainwindow_p.h"
 #include "toolbarcontainerlayout.h"
 #include "toolbar.h"
+#include "toolbartraylayout.h"
 
 using namespace KDToolBars;
 
@@ -22,6 +23,11 @@ MainWindow::Private::Private(MainWindow *mainWindow)
     , m_layout(new ToolBarContainerLayout(m_container))
 {
     m_layout->setContentsMargins(0, 0, 0, 0);
+
+    connect(m_layout, &ToolBarContainerLayout::toolBarAboutToBeInserted, q, &MainWindow::toolBarAboutToBeInserted);
+    connect(m_layout, &ToolBarContainerLayout::toolBarInserted, q, &MainWindow::toolBarInserted);
+    connect(m_layout, &ToolBarContainerLayout::toolBarAboutToBeRemoved, q, &MainWindow::toolBarAboutToBeRemoved);
+    connect(m_layout, &ToolBarContainerLayout::toolBarRemoved, q, &MainWindow::toolBarRemoved);
 }
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
@@ -91,6 +97,22 @@ void MainWindow::removeToolBar(ToolBar *toolbar)
     d->m_layout->removeToolBar(toolbar);
 
     toolbar->hide();
+}
+
+ToolBarTray MainWindow::toolBarTray(const ToolBar *toolbar) const
+{
+    auto *tray = d->m_layout->toolBarTray(toolbar);
+    return tray != nullptr ? tray->tray() : ToolBarTray::None;
+}
+
+int MainWindow::toolBarCount() const
+{
+    return d->m_layout->toolBarCount();
+}
+
+ToolBar *MainWindow::toolBarAt(int index) const
+{
+    return d->m_layout->toolBarAt(index);
 }
 
 QByteArray MainWindow::saveToolBarState() const
