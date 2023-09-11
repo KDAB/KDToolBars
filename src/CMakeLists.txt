@@ -17,6 +17,8 @@ set(KDTOOLBARS_SOURCES
     toolbarcontainerlayout.cpp
     toolbarcontainerlayout.h
     mainwindow.cpp
+    toolbarcustomizationdialog.cpp
+    toolbarcustomizationdialog.h
 )
 
 set(KDTOOLBARS_INSTALLABLE_HEADERS

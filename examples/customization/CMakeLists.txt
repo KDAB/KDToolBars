@@ -6,6 +6,6 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-add_executable(simple-example main.cpp test.qrc)
+add_executable(customization-example main.cpp test.qrc)
 
-target_link_libraries(simple-example PRIVATE kdtoolbars)
+target_link_libraries(customization-example PRIVATE kdtoolbars)

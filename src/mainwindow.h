@@ -14,6 +14,7 @@
 
 namespace KDToolBars {
 
+class CToolBarCustomizeDlg;
 class ToolBarContainerLayout;
 class ToolBar;
 
@@ -53,7 +54,7 @@ public:
     bool restoreToolBarState(const QByteArray &state);
 
     bool isCustomizingToolBars() const;
-    void setCustomizingToolBars(bool customizing);
+    void customizeToolBars();
 
 signals:
     void customizingToolBarsChanged(bool customizing);
@@ -64,6 +65,7 @@ signals:
 
 private:
     friend class ToolBar;
+    friend class ToolBarCustomizationDialog;
 
     class Private;
     Private *d;

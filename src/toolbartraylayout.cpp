@@ -160,7 +160,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
 {
     if (toolbar->isFloating())
         return;
-    auto itemPath = FindItem(toolbar);
+    auto itemPath = findItem(toolbar);
     if (!itemPath)
         return;
 
@@ -312,7 +312,7 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
 
 void ToolBarTrayLayout::adjustToolBarRow(const ToolBar *toolbar)
 {
-    const auto itemPath = FindItem(toolbar);
+    const auto itemPath = findItem(toolbar);
     if (!itemPath)
         return;
     const auto row = itemPath->row;
@@ -333,7 +333,7 @@ void ToolBarTrayLayout::insertToolBar(ToolBar *before, ToolBar *toolbar)
             return { items, items.count() };
         } else {
             // find where to insert it
-            const auto path = FindItem(before);
+            const auto path = findItem(before);
             Q_ASSERT(path);
             auto &items = m_rows[path->row].items;
             return { items, path->index };
@@ -368,7 +368,7 @@ void ToolBarTrayLayout::insertToolBarBreak(ToolBar *before)
         return;
     }
 
-    const auto path = FindItem(before);
+    const auto path = findItem(before);
     Q_ASSERT(path);
     // no need to insert a break if this is already the first item in the row
     if (path->index == 0)
@@ -416,7 +416,7 @@ void ToolBarTrayLayout::updateRowSizes() const
     that->m_dirty = false;
 }
 
-std::optional<ToolBarTrayLayout::ItemPath> ToolBarTrayLayout::FindItem(
+std::optional<ToolBarTrayLayout::ItemPath> ToolBarTrayLayout::findItem(
     const QWidget *widget) const
 {
     for (int row = 0, count = m_rows.count(); row < count; ++row) {
@@ -585,7 +585,7 @@ bool ToolBarTrayLayout::hoverToolBar(ToolBar *toolbar)
 
     auto *layoutItem = [this, toolbar] {
         auto *tray = m_parent->toolBarTray(toolbar);
-        auto itemPath = tray->FindItem(toolbar);
+        auto itemPath = tray->findItem(toolbar);
         Q_ASSERT(itemPath);
         auto [layoutItem, rowRemoved] = tray->TakeLayoutItem(*itemPath);
         return layoutItem;
@@ -637,7 +637,7 @@ int ToolBarTrayLayout::Row::dockedCount() const
 
 bool ToolBarTrayLayout::hasToolBar(const ToolBar *toolbar) const
 {
-    return FindItem(toolbar) != std::nullopt;
+    return findItem(toolbar) != std::nullopt;
 }
 
 ToolBarTrayLayoutState ToolBarTrayLayout::state() const
@@ -651,12 +651,14 @@ ToolBarTrayLayoutState ToolBarTrayLayout::state() const
         for (const auto &item : items) {
             const auto *tb = qobject_cast<ToolBar *>(item.widgetItem->widget());
             Q_ASSERT(tb);
-            if (tb->objectName().isEmpty()) {
+            const bool isCustom = tb->options() & ToolBarOption::IsCustom;
+            if (!isCustom && tb->objectName().isEmpty()) {
                 qWarning("Object name is not set for toolbar, won't be properly restored!");
             }
             ToolBarTrayLayoutState::Item itemState;
+            itemState.isCustom = isCustom;
             itemState.pos = item.pos;
-            itemState.objectName = tb->objectName();
+            itemState.objectName = isCustom ? tb->windowTitle() : tb->objectName();
             itemState.isHidden = tb->isHidden();
             itemState.isFloating = tb->isFloating();
             itemState.floatingPos = tb->isFloating() ? tb->pos() : QPoint();
@@ -681,15 +683,28 @@ void ToolBarTrayLayout::applyState(
     for (const auto &rowState : state.rows) {
         QVector<Item> items;
         for (auto &itemState : rowState.items) {
-            const auto &objectName = itemState.objectName;
-            if (objectName.isEmpty())
+            ToolBar *toolbar = [this, &itemState, &toolbars]() -> ToolBar * {
+                if (itemState.isCustom) {
+                    auto toolbar = new ToolBar(ToolBarOption::IsCustom);
+                    toolbar->setWindowTitle(itemState.objectName);
+
+                    m_parent->addChildWidget(toolbar);
+                    m_parent->m_toolbars.push_back(toolbar); // TODO: rethink this
+                    m_parent->m_toolbarTray[toolbar] = this;
+
+                    return toolbar;
+                }
+
+                const auto &objectName = itemState.objectName;
+                if (objectName.isEmpty())
+                    return nullptr;
+                auto it = std::find_if(toolbars.begin(), toolbars.end(), [&objectName](auto *tb) {
+                    return tb->objectName() == objectName;
+                });
+                return it != toolbars.end() ? *it : nullptr;
+            }();
+            if (toolbar == nullptr)
                 continue;
-            auto it = std::find_if(toolbars.begin(), toolbars.end(), [&objectName](auto *tb) {
-                return tb->objectName() == objectName;
-            });
-            if (it == toolbars.end())
-                continue;
-            auto *toolbar = *it;
             auto *widgetItem = QLayoutPrivate::createWidgetItem(m_parent, toolbar);
 
             Item item;
@@ -720,6 +735,7 @@ void ToolBarTrayLayoutState::save(QDataStream &stream) const
         const auto &items = row.items;
         stream << static_cast<int>(items.size());
         for (const auto &item : items) {
+            stream << item.isCustom;
             stream << item.pos;
             stream << item.objectName;
             stream << item.isHidden;
@@ -743,6 +759,7 @@ bool ToolBarTrayLayoutState::load(QDataStream &stream)
         row.items.reserve(itemCount);
         for (int j = 0; j < itemCount; ++j) {
             Item item;
+            stream >> item.isCustom;
             stream >> item.pos;
             stream >> item.objectName;
             stream >> item.isHidden;

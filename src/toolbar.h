@@ -22,13 +22,22 @@ class QStyleOption;
 
 namespace KDToolBars {
 
+enum class ToolBarOption {
+    None = 0,
+    IsCustom = 1, // created while customizing toolbars
+};
+Q_DECLARE_FLAGS(ToolBarOptions, ToolBarOption);
+Q_DECLARE_OPERATORS_FOR_FLAGS(ToolBarOptions);
+
 class ToolBar : public QFrame
 {
     Q_OBJECT
 public:
-    explicit ToolBar(const QString &title, QWidget *parent = nullptr);
+    explicit ToolBar(ToolBarOptions options = ToolBarOption::None, QWidget *parent = nullptr);
     explicit ToolBar(QWidget *parent = nullptr);
     ~ToolBar() override;
+
+    ToolBarOptions options() const;
 
     bool columnLayout() const;
     void setColumnLayout(bool columnLayout);
@@ -57,6 +66,9 @@ public:
     ToolBarTrays allowedTrays() const;
 
     QToolButton *closeButton() const;
+
+    virtual bool canBeReset() const;
+    virtual void reset();
 
 signals:
     void iconSizeChanged(const QSize &size);

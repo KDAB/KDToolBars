@@ -18,7 +18,8 @@
 #include <QVBoxLayout>
 #include <QCheckBox>
 #include <QPushButton>
-#include <QDebug>
+
+using namespace KDToolBars;
 
 KDToolBars::ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
 {
@@ -110,6 +111,10 @@ private:
                 if (!m_lastState.isNull())
                     restoreToolBarState(m_lastState);
             });
+
+            auto *customize = new QPushButton(tr("Customize"), this);
+            buttonLayout->addWidget(customize);
+            connect(customize, &QAbstractButton::clicked, this, &MainWindow::customizeToolBars);
 
             buttonLayout->addStretch();
         }

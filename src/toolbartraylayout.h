@@ -26,6 +26,7 @@ struct ToolBarTrayLayoutState
 {
     struct Item
     {
+        bool isCustom;
         int pos;
         QString objectName;
         bool isHidden;
@@ -102,7 +103,7 @@ private:
 
         int dockedCount() const;
     };
-    std::optional<ItemPath> FindItem(const QWidget *widget) const;
+    std::optional<ItemPath> findItem(const QWidget *widget) const;
     Item *item(const ItemPath &path);
     QLayoutItem *layoutItem(const ItemPath &path);
     std::tuple<QLayoutItem *, bool> TakeLayoutItem(const ItemPath &path);

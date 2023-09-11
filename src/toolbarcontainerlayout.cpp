@@ -374,6 +374,21 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
         return std::vector<QAction *>(actions.begin(), actions.end());
     }();
 
+    // remove any custom toolbars (will be recreated when we apply state)
+    {
+        auto it = m_toolbars.begin();
+        while (it != m_toolbars.end()) {
+            auto *toolbar = *it;
+            if (toolbar->options() & ToolBarOption::IsCustom) {
+                it = m_toolbars.erase(it);
+                m_toolbarTray.erase(toolbar);
+                delete toolbar;
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (size_t i = 0; i < TrayCount; ++i)
         m_trays[i]->applyState(trayStates[i], m_toolbars, actions);
 

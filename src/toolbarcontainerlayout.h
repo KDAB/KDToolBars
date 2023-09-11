@@ -69,6 +69,7 @@ signals:
     void toolBarRemoved();
 
 private:
+    friend class ToolBarTrayLayout;
     enum TrayPosition {
         TopTray,
         LeftTray,

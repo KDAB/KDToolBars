@@ -78,8 +78,9 @@ protected:
 
 }
 
-ToolBar::Private::Private(ToolBar *toolbar)
+ToolBar::Private::Private(ToolBarOptions options, ToolBar *toolbar)
     : q(toolbar)
+    , m_options(options)
 {
 }
 
@@ -729,19 +730,28 @@ void ToolBar::Private::applyState(const ToolBarState &state, const std::vector<Q
     m_layout->applyState(state.layoutState);
 }
 
-ToolBar::ToolBar(const QString &title, QWidget *parent)
+ToolBar::ToolBar(ToolBarOptions options, QWidget *parent)
     : QFrame(parent)
-    , d(new Private(this))
+    , d(new Private(options, this))
 {
     initKDToolBarsResources();
 
-    setWindowTitle(title);
     d->init();
+}
+
+ToolBar::ToolBar(QWidget *parent)
+    : ToolBar(ToolBarOption::None, parent)
+{
 }
 
 ToolBar::~ToolBar()
 {
     delete d;
+}
+
+ToolBarOptions ToolBar::options() const
+{
+    return d->m_options;
 }
 
 void ToolBar::paintEvent(QPaintEvent *event)
@@ -966,6 +976,15 @@ ToolBarTrays ToolBar::allowedTrays() const
 QToolButton *ToolBar::closeButton() const
 {
     return d->m_closeButton;
+}
+
+bool ToolBar::canBeReset() const
+{
+    return false;
+}
+
+void ToolBar::reset()
+{
 }
 
 void ToolBar::updateIconSize(const QSize &size)

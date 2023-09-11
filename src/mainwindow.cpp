@@ -12,6 +12,7 @@
 
 #include "mainwindow_p.h"
 #include "toolbarcontainerlayout.h"
+#include "toolbarcustomizationdialog.h"
 #include "toolbar.h"
 #include "toolbartraylayout.h"
 
@@ -28,6 +29,14 @@ MainWindow::Private::Private(MainWindow *mainWindow)
     connect(m_layout, &ToolBarContainerLayout::toolBarInserted, q, &MainWindow::toolBarInserted);
     connect(m_layout, &ToolBarContainerLayout::toolBarAboutToBeRemoved, q, &MainWindow::toolBarAboutToBeRemoved);
     connect(m_layout, &ToolBarContainerLayout::toolBarRemoved, q, &MainWindow::toolBarRemoved);
+}
+
+void MainWindow::Private::setCustomizingToolBars(bool customizing)
+{
+    if (customizing == m_customizingToolBars)
+        return;
+    m_customizingToolBars = customizing;
+    emit q->customizingToolBarsChanged(customizing);
 }
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
@@ -135,10 +144,11 @@ bool MainWindow::isCustomizingToolBars() const
     return d->m_customizingToolBars;
 }
 
-void MainWindow::setCustomizingToolBars(bool customizing)
+void MainWindow::customizeToolBars()
 {
-    if (d->m_customizingToolBars == customizing)
+    if (d->m_customizingToolBars)
         return;
-    d->m_customizingToolBars = customizing;
-    emit customizingToolBarsChanged(customizing);
+
+    ToolBarCustomizationDialog *dlg = new ToolBarCustomizationDialog(this, this);
+    dlg->show();
 }

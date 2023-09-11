@@ -53,7 +53,7 @@ public:
         None
     };
 
-    explicit Private(ToolBar *toolbar);
+    explicit Private(ToolBarOptions options, ToolBar *toolbar);
 
     void init();
 
@@ -118,6 +118,7 @@ public:
     void applyState(const ToolBarState &state, const std::vector<QAction *> &actions);
 
     ToolBar *const q;
+    ToolBarOptions m_options;
     bool m_columnLayout = false;
     ToolBarLayout *m_layout = nullptr;
     QToolButton *m_closeButton = nullptr;

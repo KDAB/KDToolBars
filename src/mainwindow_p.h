@@ -21,6 +21,8 @@ class MainWindow::Private
 public:
     explicit Private(MainWindow *mainWindow);
 
+    void setCustomizingToolBars(bool customizing);
+
     MainWindow *const q;
     QWidget *m_container;
     ToolBarContainerLayout *m_layout;
