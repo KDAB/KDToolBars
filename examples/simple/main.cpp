@@ -17,12 +17,13 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QDebug>
 
-using namespace KDToolBars;
-
-ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
+KDToolBars::ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
 {
-    auto *toolbar = new ToolBar(name, parent);
+    auto *toolbar = new KDToolBars::ToolBar(name, parent);
+    toolbar->setObjectName(name);
     for (const auto *iconName : icons) {
         if (iconName) {
             auto *action = new QAction(QIcon(QStringLiteral(":/%1").arg(iconName)), iconName, parent);
@@ -31,58 +32,97 @@ ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons
             toolbar->addSeparator();
         }
     }
-    toolbar->setIconSize(QSize(48, 48));
     return toolbar;
 }
+
+class TestWindow : public KDToolBars::MainWindow
+{
+public:
+    explicit TestWindow(QWidget *parent = nullptr)
+    {
+        setWindowTitle(tr("KDToolBars example"));
+
+        createCentralWidget();
+        createToolBars();
+    }
+
+private:
+    void createToolBars()
+    {
+        auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" });
+        auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" });
+        auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" });
+        auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" });
+
+        addToolBar(tb1);
+        insertToolBar(tb1, tb2);
+        addToolBarBreak();
+        addToolBar(tb3);
+        addToolBar(tb4);
+        insertToolBarBreak(tb4);
+    }
+
+    void createCentralWidget()
+    {
+        auto *centralWidget = new QWidget(this);
+
+        auto p = centralWidget->palette();
+        p.setColor(QPalette::Window, Qt::cyan);
+        centralWidget->setPalette(p);
+        centralWidget->setAutoFillBackground(true);
+
+        auto *layout = new QVBoxLayout(centralWidget);
+
+        auto *iconSize = new QCheckBox(tr("Large icons"), centralWidget);
+        layout->addWidget(iconSize);
+        connect(iconSize, &QCheckBox::toggled, this, [this](bool checked) {
+            const QSize size = checked ? QSize(64, 64) : QSize(32, 32);
+            setIconSize(size);
+        });
+
+        auto *buttonStyle = new QCheckBox(tr("Button style"), centralWidget);
+        layout->addWidget(buttonStyle);
+        connect(buttonStyle, &QCheckBox::toggled, centralWidget, [this](bool checked) {
+            const Qt::ToolButtonStyle style = checked ? Qt::ToolButtonTextOnly : Qt::ToolButtonIconOnly;
+            setToolButtonStyle(style);
+        });
+
+        // create buttons to save/restore toolbar state
+        {
+            auto *buttonLayout = new QHBoxLayout;
+            layout->addLayout(buttonLayout);
+
+            auto *saveState = new QPushButton(tr("Save state"), this);
+            buttonLayout->addWidget(saveState);
+            connect(saveState, &QAbstractButton::clicked, this, [this] {
+                m_lastState = saveToolBarState();
+            });
+
+            auto *restoreState = new QPushButton(tr("Restore state"), this);
+            buttonLayout->addWidget(restoreState);
+            connect(restoreState, &QAbstractButton::clicked, this, [this] {
+                if (!m_lastState.isNull())
+                    restoreToolBarState(m_lastState);
+            });
+
+            buttonLayout->addStretch();
+        }
+
+        layout->addStretch();
+
+        setCentralWidget(centralWidget);
+    }
+
+    QByteArray m_lastState;
+};
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" });
-    auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" });
-    auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" });
-    auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" });
-
-    MainWindow mw;
-    mw.setWindowTitle(QObject::tr("KDToolBars example"));
-
-    mw.addToolBar(tb1);
-    mw.insertToolBar(tb1, tb2);
-    mw.addToolBarBreak();
-    mw.addToolBar(tb3);
-    mw.addToolBar(tb4);
-    mw.insertToolBarBreak(tb4);
-
-    auto *centralWidget = new QWidget(&mw);
-
-    auto p = centralWidget->palette();
-    p.setColor(QPalette::Window, Qt::cyan);
-    centralWidget->setPalette(p);
-    centralWidget->setAutoFillBackground(true);
-
-    auto *layout = new QVBoxLayout(centralWidget);
-
-    auto *iconSize = new QCheckBox(QObject::tr("Large icons"), centralWidget);
-    layout->addWidget(iconSize);
-    QObject::connect(iconSize, &QCheckBox::toggled, &mw, [&mw](bool checked) {
-        const QSize size = checked ? QSize(64, 64) : QSize(32, 32);
-        mw.setIconSize(size);
-    });
-
-    auto *buttonStyle = new QCheckBox(QObject::tr("Button style"), centralWidget);
-    layout->addWidget(buttonStyle);
-    QObject::connect(buttonStyle, &QCheckBox::toggled, centralWidget, [&mw](bool checked) {
-        const Qt::ToolButtonStyle style = checked ? Qt::ToolButtonTextOnly : Qt::ToolButtonIconOnly;
-        mw.setToolButtonStyle(style);
-    });
-
-    layout->addStretch();
-
-    mw.setCentralWidget(centralWidget);
-
-    mw.resize(1500, 400);
-    mw.show();
+    TestWindow w;
+    w.resize(1500, 400);
+    w.show();
 
     return app.exec();
 }
