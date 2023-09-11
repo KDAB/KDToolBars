@@ -61,7 +61,7 @@ public:
 signals:
     void iconSizeChanged(const QSize &size);
     void toolButtonStyleChanged(const Qt::ToolButtonStyle style);
-    void topLevelChanged(bool isTopLevel);
+    void isFloatingChanged(bool isFloating);
     void changed();
 
 protected:

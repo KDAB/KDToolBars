@@ -563,7 +563,7 @@ void ToolBar::Private::setWindowState(bool floating, const QPoint &pos)
         q->grabMouse(Qt::SizeAllCursor);
     }
 
-    emit q->topLevelChanged(floating);
+    emit q->isFloatingChanged(floating);
 }
 
 void ToolBar::Private::offsetDragPosition(const QPoint &offset)
