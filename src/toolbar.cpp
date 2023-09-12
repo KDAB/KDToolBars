@@ -389,9 +389,8 @@ bool ToolBar::Private::hoverMoveEvent(const QHoverEvent *he)
 
 void ToolBar::Private::dragEnterEvent(QDragEnterEvent *e)
 {
-    if (!canCustomize())
-        return;
-    if (!qobject_cast<const ToolbarActionMimeData *>(e->mimeData()))
+    auto *data = qobject_cast<const ToolbarActionMimeData *>(e->mimeData());
+    if (data == nullptr || !q->canDropAction(data->action))
         return;
     m_dropIndicator->show();
     updateDropIndicatorGeometry(e->pos());
@@ -401,13 +400,11 @@ void ToolBar::Private::dragEnterEvent(QDragEnterEvent *e)
 
 void ToolBar::Private::dragMoveEvent(QDragMoveEvent *e)
 {
-    if (!qobject_cast<const ToolbarActionMimeData *>(e->mimeData()))
-        return;
-    if (updateDropIndicatorGeometry(e->pos())) {
-        e->acceptProposedAction();
-    } else {
+    auto *data = qobject_cast<const ToolbarActionMimeData *>(e->mimeData());
+    if (data != nullptr && q->canDropAction(data->action) && updateDropIndicatorGeometry(e->pos()))
+        e->accept();
+    else
         e->ignore();
-    }
 }
 
 QRect ToolBar::Private::actionRect(QAction *action) const
@@ -462,6 +459,8 @@ void ToolBar::Private::dropEvent(QDropEvent *e)
     if (!data)
         return;
     QAction *actionToInsert = data->action;
+    if (!q->canDropAction(actionToInsert))
+        return;
 
     const auto dropSite = m_layout->findDropSite(e->pos());
     const auto position = dropSite.itemIndex;
@@ -615,44 +614,43 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
         return false;
 
     switch (event->type()) {
-    case QEvent::MouseButtonPress: {
-        auto *me = static_cast<QMouseEvent *>(event);
-        if (canCustomize() && me->button() == Qt::LeftButton) {
-            // We're customizing toolbars, start dragging this action
-            QDrag *drag = new QDrag(q);
-            {
-                QPixmap iconPixmap(sourceWidget->size());
-                QPainter painter(&iconPixmap);
-                sourceWidget->render(&painter);
-                drag->setPixmap(iconPixmap);
-            }
-            auto *data = new ToolbarActionMimeData;
-            data->action = sourceAction;
-            drag->setMimeData(data);
-            const Qt::DropAction dropAction = drag->exec(Qt::MoveAction | Qt::CopyAction);
-            if (dropAction == Qt::IgnoreAction) {
-                // Action was dropped outside a toolbar, delete it
-                q->removeAction(sourceAction);
-                emit q->actionsCustomized();
+    case QEvent::MouseButtonPress:
+        if (canCustomize()) {
+            auto *me = static_cast<QMouseEvent *>(event);
+            if (me->button() == Qt::LeftButton && q->canDragAction(sourceAction)) {
+                // We're customizing toolbars, start dragging this action
+                QDrag *drag = new QDrag(q);
+                {
+                    QPixmap iconPixmap(sourceWidget->size());
+                    QPainter painter(&iconPixmap);
+                    sourceWidget->render(&painter);
+                    drag->setPixmap(iconPixmap);
+                }
+                auto *data = new ToolbarActionMimeData;
+                data->action = sourceAction;
+                drag->setMimeData(data);
+                const Qt::DropAction dropAction = drag->exec(Qt::MoveAction | Qt::CopyAction);
+                if (dropAction == Qt::IgnoreAction) {
+                    // Action was dropped outside a toolbar, delete it
+                    q->removeAction(sourceAction);
+                    emit q->actionsCustomized();
+                }
             }
             return true;
         }
         break;
-    }
     case QEvent::MouseButtonRelease:
     case QEvent::MouseButtonDblClick:
-    case QEvent::MouseMove: {
+    case QEvent::MouseMove:
         // Ignore mouse events while customizing toolbars
         if (canCustomize())
             return true;
         break;
-    }
-    case QEvent::ToolTip: {
+    case QEvent::ToolTip:
         // Don't display tooltips while customizing toolbars
         if (canCustomize())
             return true;
         break;
-    }
     default:
         break;
     }
@@ -971,6 +969,16 @@ ToolBarTrays ToolBar::allowedTrays() const
 QToolButton *ToolBar::closeButton() const
 {
     return d->m_closeButton;
+}
+
+bool ToolBar::canDragAction(QAction *) const
+{
+    return d->m_options & ToolBarOption::IsCustomizable;
+}
+
+bool ToolBar::canDropAction(QAction *) const
+{
+    return d->m_options & ToolBarOption::IsCustomizable;
 }
 
 bool ToolBar::canBeReset() const

@@ -24,7 +24,8 @@ namespace KDToolBars {
 
 enum class ToolBarOption {
     None = 0,
-    IsCustom = 1, // created while customizing toolbars
+    IsCustomizable = 1, // can be customized by the user
+    IsCustom = 2, // created while customizing toolbars
 };
 Q_DECLARE_FLAGS(ToolBarOptions, ToolBarOption);
 Q_DECLARE_OPERATORS_FOR_FLAGS(ToolBarOptions);
@@ -65,6 +66,9 @@ public:
     ToolBarTrays allowedTrays() const;
 
     QToolButton *closeButton() const;
+
+    virtual bool canDragAction(QAction *action) const;
+    virtual bool canDropAction(QAction *action) const;
 
     virtual bool canBeReset() const;
     virtual void reset();

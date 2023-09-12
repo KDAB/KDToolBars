@@ -21,10 +21,13 @@
 
 using namespace KDToolBars;
 
-ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
+ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, bool customizable, QWidget *parent = nullptr)
 {
     static int toolbarId = 0;
-    auto *toolbar = new ToolBar(ToolBarOption::None, parent);
+    ToolBarOptions options = ToolBarOption::None;
+    if (customizable)
+        options |= ToolBarOption::IsCustomizable;
+    auto *toolbar = new ToolBar(options, parent);
     toolbar->setWindowTitle(name);
     toolbar->setObjectName(QString::number(toolbarId));
     ++toolbarId;
@@ -56,10 +59,10 @@ public:
 private:
     void createToolBars()
     {
-        auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" });
-        auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" });
-        auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" });
-        auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" });
+        auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" }, true);
+        auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" }, true);
+        auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" }, true);
+        auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" }, false);
 
         addToolBar(tb1);
         insertToolBar(tb1, tb2);
