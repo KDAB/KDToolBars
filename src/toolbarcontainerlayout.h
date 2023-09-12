@@ -57,6 +57,8 @@ public:
 
     ToolBarTrayLayout *toolBarTray(const ToolBar *toolbar) const;
 
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
     void saveState(QDataStream &stream) const;
     bool restoreState(QDataStream &stream);
 
@@ -74,11 +76,13 @@ private:
         BottomTray,
         TrayCount
     };
+    void insertToolBar(ToolBarTrayLayout *trayLayout, ToolBar *before, ToolBar *toolbar);
     int trayIndex(ToolBarTray tray) const;
     std::array<ToolBarTrayLayout *, TrayCount> m_trays;
     std::vector<ToolBar *> m_toolbars;
     std::unordered_map<const ToolBar *, ToolBarTrayLayout *> m_toolbarTray;
     QLayoutItem *m_centralWidget = nullptr;
+    std::unique_ptr<QWidget> m_actionContainer;
 
     template<typename TraySizeGetterT, typename WidgetSizeGetterT>
     QSize layoutSize(TraySizeGetterT traySize, WidgetSizeGetterT widgetSize) const;

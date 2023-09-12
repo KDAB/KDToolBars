@@ -11,7 +11,7 @@
 #pragma once
 
 #include "mainwindow.h"
-#include "toolbarlayout.h"
+#include "toolbar_p.h"
 
 #include <QLayoutItem>
 
@@ -31,7 +31,7 @@ struct ToolBarTrayLayoutState
         bool isHidden;
         bool isFloating;
         QPoint floatingPos;
-        ToolBarLayoutState layoutState;
+        ToolBarState toolBarState;
     };
     struct Row
     {
@@ -79,7 +79,7 @@ public:
     bool hasToolBar(const ToolBar *toolbar) const;
 
     ToolBarTrayLayoutState state() const;
-    void applyState(const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars);
+    void applyState(const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars, const std::vector<QAction *> &actions);
 
 private:
     struct Item

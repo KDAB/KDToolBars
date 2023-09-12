@@ -13,7 +13,12 @@
 #include "toolbar.h"
 #include "toolbartraylayout.h"
 
+#include <QAction>
+#include <QActionEvent>
+
 #include <QtWidgets/private/qlayout_p.h>
+
+#include <unordered_set>
 
 using namespace KDToolBars;
 
@@ -23,6 +28,7 @@ constexpr int kLayoutVersionMarker = 1;
 
 ToolBarContainerLayout::ToolBarContainerLayout(QWidget *parent)
     : QLayout(parent)
+    , m_actionContainer(new QWidget)
 {
     m_trays[TopTray] = new ToolBarTrayLayout(ToolBarTray::Top, Qt::Horizontal, this);
     m_trays[LeftTray] = new ToolBarTrayLayout(ToolBarTray::Left, Qt::Vertical, this);
@@ -191,32 +197,38 @@ void ToolBarContainerLayout::addToolBar(ToolBarTray tray, ToolBar *toolbar)
     const auto trayIndex = this->trayIndex(tray);
     if (trayIndex == -1)
         return;
-
-    emit toolBarAboutToBeInserted(toolbar, m_toolbars.size());
-
-    addChildWidget(toolbar);
-
-    m_toolbars.push_back(toolbar);
     auto *trayLayout = m_trays[trayIndex];
-    m_toolbarTray[toolbar] = trayLayout;
-    trayLayout->insertToolBar(nullptr, toolbar);
-
-    invalidate();
-
-    emit toolBarInserted(toolbar);
+    insertToolBar(trayLayout, nullptr, toolbar);
 }
 
 void ToolBarContainerLayout::insertToolBar(ToolBar *before, ToolBar *toolbar)
+{
+    auto *trayLayout = toolBarTray(before);
+    Q_ASSERT(trayLayout);
+    insertToolBar(trayLayout, before, toolbar);
+}
+
+void ToolBarContainerLayout::insertToolBar(ToolBarTrayLayout *trayLayout, ToolBar *before, ToolBar *toolbar)
 {
     emit toolBarAboutToBeInserted(toolbar, m_toolbars.size());
 
     addChildWidget(toolbar);
 
     m_toolbars.push_back(toolbar);
-    auto *trayLayout = toolBarTray(before);
-    Q_ASSERT(trayLayout);
     m_toolbarTray[toolbar] = trayLayout;
     trayLayout->insertToolBar(before, toolbar);
+
+    // Add all actions in the toolbar to the dummy widget m_actionContainer. We need them for when we restore
+    // the state of the toolbars. We can't simply collect all actions from the existing toolbars immediately
+    // before restoring, because toolbars may have lost some of the actions during customization and we want to
+    // add them back when restoring.
+    //
+    // We use a QWidget for this because if the action is destroyed it's automatically removed from
+    // m_actionContainer.
+    const auto actions = toolbar->actions();
+    for (auto *action : actions)
+        m_actionContainer->addAction(action);
+    toolbar->installEventFilter(this);
 
     invalidate();
 
@@ -298,6 +310,7 @@ void ToolBarContainerLayout::removeToolBar(ToolBar *toolbar)
 
     m_toolbars.erase(it);
     m_toolbarTray.erase(toolbar);
+    toolbar->removeEventFilter(this);
 
     emit toolBarRemoved();
 }
@@ -317,6 +330,16 @@ int ToolBarContainerLayout::trayIndex(ToolBarTray tray) const
         break;
     }
     return -1;
+}
+
+bool ToolBarContainerLayout::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::ActionAdded) {
+        auto *action = static_cast<QActionEvent *>(event)->action();
+        if (auto *tb = qobject_cast<ToolBar *>(watched))
+            m_actionContainer->addAction(action);
+    }
+    return false;
 }
 
 void ToolBarContainerLayout::saveState(QDataStream &stream) const
@@ -345,22 +368,21 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
             return false;
     }
 
-    // apply tray states
-    std::vector<ToolBar *> toolbars;
-    toolbars.reserve(m_toolbarTray.size());
-    std::transform(
-        m_toolbarTray.begin(), m_toolbarTray.end(), std::back_inserter(toolbars),
-        [](const auto &item) { return const_cast<ToolBar *>(item.first); });
+    // all toolbar actions
+    const std::vector<QAction *> actions = [this] {
+        auto actions = m_actionContainer->actions();
+        return std::vector<QAction *>(actions.begin(), actions.end());
+    }();
 
     for (size_t i = 0; i < TrayCount; ++i)
-        m_trays[i]->applyState(trayStates[i], toolbars);
+        m_trays[i]->applyState(trayStates[i], m_toolbars, actions);
 
     // clear toolbar tray map
     decltype(m_toolbarTray) oldToolbarTray;
     std::swap(oldToolbarTray, m_toolbarTray);
 
     // add back any toolbar that wasn't restored
-    for (auto *toolbar : toolbars) {
+    for (auto *toolbar : m_toolbars) {
         const auto found = std::any_of(
             m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
         if (!found) {
@@ -370,7 +392,7 @@ bool ToolBarContainerLayout::restoreState(QDataStream &stream)
     }
 
     // reinitialize the toolbar -> tray map
-    for (auto *toolbar : toolbars) {
+    for (auto *toolbar : m_toolbars) {
         auto it = std::find_if(
             m_trays.begin(), m_trays.end(), [toolbar](auto *tray) { return tray->hasToolBar(toolbar); });
         Q_ASSERT(it != m_trays.end());

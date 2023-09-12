@@ -22,11 +22,16 @@
 
 KDToolBars::ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
 {
+    static int toolbarId = 0;
     auto *toolbar = new KDToolBars::ToolBar(name, parent);
-    toolbar->setObjectName(name);
+    toolbar->setObjectName(QString::number(toolbarId));
+    ++toolbarId;
     for (const auto *iconName : icons) {
         if (iconName) {
+            static int actionId = 0;
             auto *action = new QAction(QIcon(QStringLiteral(":/%1").arg(iconName)), iconName, parent);
+            action->setObjectName(QString::number(actionId));
+            ++actionId;
             toolbar->addAction(action);
         } else {
             toolbar->addSeparator();

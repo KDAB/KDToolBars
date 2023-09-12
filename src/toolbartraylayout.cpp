@@ -660,7 +660,7 @@ ToolBarTrayLayoutState ToolBarTrayLayout::state() const
             itemState.isHidden = tb->isHidden();
             itemState.isFloating = tb->isFloating();
             itemState.floatingPos = tb->isFloating() ? tb->pos() : QPoint();
-            itemState.layoutState = tb->d->m_layout->state();
+            itemState.toolBarState = tb->d->state();
             rowState.items.push_back(std::move(itemState));
         }
         state.rows.push_back(std::move(rowState));
@@ -669,7 +669,7 @@ ToolBarTrayLayoutState ToolBarTrayLayout::state() const
 }
 
 void ToolBarTrayLayout::applyState(
-    const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars)
+    const ToolBarTrayLayoutState &state, const std::vector<ToolBar *> &toolbars, const std::vector<QAction *> &actions)
 {
     // remove all current toolbars
     for (auto &row : m_rows) {
@@ -699,7 +699,7 @@ void ToolBarTrayLayout::applyState(
 
             toolbar->setDockedOrientation(m_orientation);
             toolbar->setVisible(!itemState.isHidden);
-            toolbar->d->m_layout->applyState(itemState.layoutState);
+            toolbar->d->applyState(itemState.toolBarState, actions);
             toolbar->d->setWindowState(itemState.isFloating);
             if (itemState.isFloating) {
                 toolbar->move(itemState.floatingPos);
@@ -725,7 +725,7 @@ void ToolBarTrayLayoutState::save(QDataStream &stream) const
             stream << item.isHidden;
             stream << item.isFloating;
             stream << item.floatingPos;
-            item.layoutState.save(stream);
+            item.toolBarState.save(stream);
         }
     }
 }
@@ -748,7 +748,7 @@ bool ToolBarTrayLayoutState::load(QDataStream &stream)
             stream >> item.isHidden;
             stream >> item.isFloating;
             stream >> item.floatingPos;
-            item.layoutState.load(stream);
+            item.toolBarState.load(stream);
             row.items.push_back(std::move(item));
         }
         rows.push_back(std::move(row));

@@ -21,6 +21,20 @@ namespace KDToolBars {
 
 class DropIndicator;
 
+struct ToolBarState
+{
+    struct Action
+    {
+        bool isSeparator;
+        QString objectName;
+    };
+    std::vector<Action> actions;
+    ToolBarLayoutState layoutState;
+
+    void save(QDataStream &stream) const;
+    bool load(QDataStream &stream);
+};
+
 class ToolbarActionMimeData : public QMimeData
 {
     Q_OBJECT
@@ -99,6 +113,9 @@ public:
     QRect actionRect(QAction *action) const;
     bool updateDropIndicatorGeometry(QPoint pos);
     bool canCustomize() const;
+
+    ToolBarState state() const;
+    void applyState(const ToolBarState &state, const std::vector<QAction *> &actions);
 
     ToolBar *const q;
     bool m_columnLayout = false;

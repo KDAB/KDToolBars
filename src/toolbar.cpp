@@ -687,6 +687,48 @@ ToolBar::Private::ActionWidget ToolBar::Private::createWidgetForAction(QAction *
     return { ToolBarLayout::ToolBarWidgetType::StandardButton, button };
 }
 
+ToolBarState ToolBar::Private::state() const
+{
+    ToolBarState state;
+    const auto actions = q->actions();
+    state.actions.reserve(actions.size());
+    std::transform(actions.begin(), actions.end(), std::back_inserter(state.actions), [](const QAction *action) {
+        ToolBarState::Action item;
+        item.isSeparator = action->isSeparator();
+        if (!action->isSeparator() && action->objectName().isNull())
+            qWarning("Action object name is null, won't be properly restored!");
+        item.objectName = action->objectName();
+        return item;
+    });
+    state.layoutState = m_layout->state();
+    return state;
+}
+
+void ToolBar::Private::applyState(const ToolBarState &state, const std::vector<QAction *> &actions)
+{
+    // remove all current actions
+    const auto currentActions = q->actions();
+    for (auto *action : currentActions)
+        q->removeAction(action);
+
+    // add back actions
+    for (const auto &actionState : state.actions) {
+        if (actionState.isSeparator) {
+            q->addSeparator();
+        } else {
+            const auto &objectName = actionState.objectName;
+            auto it = std::find_if(actions.begin(), actions.end(), [&objectName](const auto *action) {
+                return action->objectName() == objectName;
+            });
+            if (it != actions.end())
+                q->addAction(*it);
+        }
+    }
+
+    // restore layout state
+    m_layout->applyState(state.layoutState);
+}
+
 ToolBar::ToolBar(const QString &title, QWidget *parent)
     : QFrame(parent)
     , d(new Private(this))
@@ -940,4 +982,30 @@ void ToolBar::updateToolButtonStyle(Qt::ToolButtonStyle style)
         return;
     setToolButtonStyle(style);
     d->m_explicitToolButtonStyle = false;
+}
+
+void ToolBarState::save(QDataStream &stream) const
+{
+    stream << static_cast<int>(actions.size());
+    for (const auto &action : actions) {
+        stream << action.isSeparator;
+        stream << action.objectName;
+    }
+    layoutState.save(stream);
+}
+
+bool ToolBarState::load(QDataStream &stream)
+{
+    actions.clear();
+    int actionCount;
+    stream >> actionCount;
+    actions.reserve(actionCount);
+    for (int i = 0; i < actionCount; ++i) {
+        Action action;
+        stream >> action.isSeparator;
+        stream >> action.objectName;
+        actions.push_back(std::move(action));
+    }
+    layoutState.load(stream);
+    return stream.status() == QDataStream::Ok;
 }
