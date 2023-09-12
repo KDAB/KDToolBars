@@ -6,7 +6,12 @@
 ## Features
 
 - Provide advanced capabilities beyond what QToolbar provides, including:
-  - toolbar customization by the user, including action drag and drop and creating/deleting custom toolbars
+  - toolbar customization by the user
+    - while in customization mode, actions can be dragged and dropped between
+      toolbars
+    - custom toolbars can be created and deleted by the user
+    - toolbars can be reset back to their original actions
+    - customizations can be automatically saved and restored
   - toolbar displays a title bar while floating
   - toolbar can be resized while floating
   - double click on toolbar title bar to redock
