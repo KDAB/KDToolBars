@@ -10,6 +10,6 @@ add_subdirectory(simple)
 add_subdirectory(customization)
 
 find_package(KDDockWidgets QUIET)
-if (KDDockWidgets_FOUND)
+if(KDDockWidgets_FOUND)
     add_subdirectory(kddw-integration)
 endif()

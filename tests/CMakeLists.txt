@@ -12,9 +12,10 @@ find_package(
     REQUIRED
 )
 
-function(add_kdtoolbars_test NAME SOURCES)
-    set(TARGET_NAME test_kdtoolbars_${NAME})
-    add_executable(${TARGET_NAME} ${SOURCES})
+# Create a test with the specified name
+function(add_kdtoolbars_test name sources)
+    set(TARGET_NAME test_kdtoolbars_${name})
+    add_executable(${TARGET_NAME} ${sources})
 
     target_link_libraries(${TARGET_NAME} kdtoolbars Qt5::Test)
 
