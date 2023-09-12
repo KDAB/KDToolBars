@@ -6,10 +6,6 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-add_subdirectory(simple)
-add_subdirectory(customization)
+add_executable(kddw-integration-example main.cpp test.qrc)
 
-find_package(KDDockWidgets QUIET)
-if (KDDockWidgets_FOUND)
-    add_subdirectory(kddw-integration)
-endif()
+target_link_libraries(kddw-integration-example PRIVATE kdtoolbars KDAB::kddockwidgets)
