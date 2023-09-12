@@ -23,6 +23,7 @@ class TestMainWindow : public QObject
     Q_OBJECT
 private slots:
     void testSimple();
+    void testSaveState();
 };
 
 void TestMainWindow::testSimple()
@@ -71,6 +72,31 @@ void TestMainWindow::testSimple()
     QCOMPARE(mw.toolBarAt(0), &tb2);
     QCOMPARE(mw.toolBarTray(&tb2), ToolBarTray::Left);
     QCOMPARE(removedSpy.count(), 2);
+}
+
+void TestMainWindow::testSaveState()
+{
+    MainWindow mw;
+
+    ToolBar tb;
+    tb.setObjectName("test-toolbar"); // needs unique object name for proper serialization
+
+    // add toolbar to the bottom tray
+    mw.addToolBar(ToolBarTray::Bottom, &tb);
+    QCOMPARE(mw.toolBarCount(), 1);
+    QCOMPARE(mw.toolBarTray(&tb), ToolBarTray::Bottom);
+
+    auto state = mw.saveToolBarState();
+
+    // move toolbar to the right tray
+    mw.addToolBar(ToolBarTray::Right, &tb);
+    QCOMPARE(mw.toolBarCount(), 1);
+    QCOMPARE(mw.toolBarTray(&tb), ToolBarTray::Right);
+
+    // restore state, toolbar should move back to the bottom tray
+    mw.restoreToolBarState(state);
+    QCOMPARE(mw.toolBarCount(), 1);
+    QCOMPARE(mw.toolBarTray(&tb), ToolBarTray::Bottom);
 }
 
 QTEST_MAIN(TestMainWindow)
