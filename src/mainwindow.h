@@ -58,9 +58,9 @@ public:
 
 signals:
     void customizingToolBarsChanged(bool customizing);
-    void toolBarAboutToBeInserted(const ToolBar* toolbar, int index);
-    void toolBarInserted(const ToolBar* toolbar);
-    void toolBarAboutToBeRemoved(const ToolBar* toolbar, int index);
+    void toolBarAboutToBeInserted(const ToolBar *toolbar, int index);
+    void toolBarInserted(const ToolBar *toolbar);
+    void toolBarAboutToBeRemoved(const ToolBar *toolbar, int index);
     void toolBarRemoved();
 
 private:
