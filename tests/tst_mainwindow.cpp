@@ -36,7 +36,7 @@ void TestMainWindow::testSimple()
     QSignalSpy removedSpy(&mw, &MainWindow::toolBarRemoved);
 
     // add one toolbar
-    ToolBar tb1(QString {});
+    ToolBar tb1;
 
     mw.addToolBar(&tb1);
     QCOMPARE(mw.toolBarCount(), 1);
@@ -47,7 +47,7 @@ void TestMainWindow::testSimple()
     QCOMPARE(mw.toolBarTray(&tb1), ToolBarTray::Top);
 
     // add another toolbar
-    ToolBar tb2(QString {});
+    ToolBar tb2;
     mw.addToolBar(ToolBarTray::Left, &tb2);
     QCOMPARE(mw.toolBarCount(), 2);
     QCOMPARE(mw.toolBarAt(1), &tb2);

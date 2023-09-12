@@ -91,7 +91,7 @@ void ToolBar::Private::init()
 
     q->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
     q->setAttribute(Qt::WA_Hover);
-#if 0
+#if defined(Q_OS_WIN)
     // Make it a native window because we want a persistent window handle that stays "alive" after the
     // widget is docked/undocked while being dragged, otherwise we lose mouse grab
     q->setAttribute(Qt::WA_NativeWindow);
@@ -737,11 +737,6 @@ ToolBar::ToolBar(ToolBarOptions options, QWidget *parent)
     initKDToolBarsResources();
 
     d->init();
-}
-
-ToolBar::ToolBar(QWidget *parent)
-    : ToolBar(ToolBarOption::None, parent)
-{
 }
 
 ToolBar::~ToolBar()

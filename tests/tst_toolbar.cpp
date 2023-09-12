@@ -69,7 +69,7 @@ private slots:
 
 void TestToolBars::testSimple()
 {
-    auto tb = new ToolBar(QString());
+    auto tb = new ToolBar;
 
     // first item in the layout is the close button
     QCOMPARE(tb->layout()->count(), 1);
@@ -95,7 +95,7 @@ void TestToolBars::testFloatingLayout()
     constexpr auto kLayoutContentsMargin = 13;
     constexpr auto kButtonCount = 8;
 
-    auto tb = new ToolBar("Test");
+    auto tb = new ToolBar;
     tb->setIconSize(QSize(kIconSize, kIconSize));
     tb->closeButton()->setIconSize(QSize(kCloseButtonIconSize, kCloseButtonIconSize));
     tb->layout()->setContentsMargins(kLayoutContentsMargin, kLayoutContentsMargin, kLayoutContentsMargin, kLayoutContentsMargin);
@@ -103,10 +103,10 @@ void TestToolBars::testFloatingLayout()
 
     tb->show();
 
-    const auto expectedSize = [](int rows, int columns) {
-        constexpr auto kButtonSize = kIconSize + kToolButtonMargin;
-        constexpr auto kCloseButtonMargin = 2; // hardcoded in ToolBarLayout::titleHeight
-        constexpr auto kTitleBarHeight = kCloseButtonIconSize + kToolButtonMargin + 2 * kCloseButtonMargin;
+    const auto expectedSize = [=](int rows, int columns) {
+        const auto kButtonSize = kIconSize + kToolButtonMargin;
+        const auto kCloseButtonMargin = 2; // hardcoded in ToolBarLayout::titleHeight
+        const auto kTitleBarHeight = kCloseButtonIconSize + kToolButtonMargin + 2 * kCloseButtonMargin;
 
         const auto width = columns * kButtonSize + (columns - 1) * kSpacing + 2 * kLayoutContentsMargin;
         const auto height = rows * kButtonSize + (rows - 1) * kSpacing + kTitleBarHeight + 2 * kLayoutContentsMargin;

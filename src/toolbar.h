@@ -34,7 +34,6 @@ class ToolBar : public QFrame
     Q_OBJECT
 public:
     explicit ToolBar(ToolBarOptions options = ToolBarOption::None, QWidget *parent = nullptr);
-    explicit ToolBar(QWidget *parent = nullptr);
     ~ToolBar() override;
 
     ToolBarOptions options() const;

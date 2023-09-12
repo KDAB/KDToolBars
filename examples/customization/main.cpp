@@ -21,10 +21,10 @@
 
 using namespace KDToolBars;
 
-KDToolBars::ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
+ToolBar *makeToolBar(const char *name, std::initializer_list<const char *> icons, QWidget *parent = nullptr)
 {
     static int toolbarId = 0;
-    auto *toolbar = new KDToolBars::ToolBar(parent);
+    auto *toolbar = new ToolBar(ToolBarOption::None, parent);
     toolbar->setWindowTitle(name);
     toolbar->setObjectName(QString::number(toolbarId));
     ++toolbarId;
