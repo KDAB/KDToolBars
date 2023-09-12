@@ -21,30 +21,17 @@ set(KDTOOLBARS_SOURCES
     toolbarcustomizationdialog.h
 )
 
-set(KDTOOLBARS_INSTALLABLE_HEADERS
-    toolbar.h
-    mainwindow.h
-)
+set(KDTOOLBARS_INSTALLABLE_HEADERS toolbar.h mainwindow.h)
 
-set(KDTOOLBARS_RESOURCES
-    kdtoolbars_resources.qrc
-)
+set(KDTOOLBARS_RESOURCES kdtoolbars_resources.qrc)
 
-add_library(
-    kdtoolbars
-    ${KDTOOLBARS_SOURCES} ${KDTOOLBARS_INSTALLABLE_HEADERS} ${KDTOOLBARS_RESOURCES}
-)
+add_library(kdtoolbars ${KDTOOLBARS_SOURCES} ${KDTOOLBARS_INSTALLABLE_HEADERS} ${KDTOOLBARS_RESOURCES})
 
-target_link_libraries(
-    kdtoolbars
-    PUBLIC Qt5::Widgets Qt5::WidgetsPrivate
-)
+target_link_libraries(kdtoolbars PUBLIC Qt5::Widgets Qt5::WidgetsPrivate)
 
 target_include_directories(
-    kdtoolbars
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fwd_headers>
-           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    kdtoolbars PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fwd_headers>
+                      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 foreach(file ${KDTOOLBARS_INSTALLABLE_HEADERS})
@@ -80,7 +67,7 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDToolBars
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/KDToolBarsConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDToolBars
 )
