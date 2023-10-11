@@ -11,8 +11,8 @@
 #include <kdtoolbars/mainwindow.h>
 #include <kdtoolbars/toolbar.h>
 
-#include <kddockwidgets/DockWidget>
-#include <kddockwidgets/MainWindow>
+#include <kddockwidgets/qtwidgets/DockWidget.h>
+#include <kddockwidgets/qtwidgets/MainWindow.h>
 
 #include <QApplication>
 #include <QAction>
@@ -37,8 +37,9 @@ class TestWindow : public KDToolBars::MainWindow
 {
 public:
     explicit TestWindow(QWidget *parent = nullptr)
-        : m_dockWidgetWindow(new KDDockWidgets::MainWindow(
-            "KDDW_MainWindow", KDDockWidgets::MainWindowOption_HasCentralWidget, this))
+        : KDToolBars::MainWindow(parent)
+        , m_dockWidgetWindow(new KDDockWidgets::QtWidgets::MainWindow(
+              "KDDW_MainWindow", KDDockWidgets::MainWindowOption_HasCentralWidget, this))
     {
         setWindowTitle(tr("KDToolBars example"));
 
@@ -66,7 +67,7 @@ private:
 
     void createDockWidgets()
     {
-        auto *dock = new KDDockWidgets::DockWidget(QStringLiteral("KDDW_Dock"));
+        auto *dock = new KDDockWidgets::QtWidgets::DockWidget(QStringLiteral("KDDW_Dock"));
         dock->setWidget(new QLabel(tr("Dock Widget"), this));
         m_dockWidgetWindow->addDockWidget(dock, KDDockWidgets::Location_OnRight);
     }
@@ -77,12 +78,14 @@ private:
         m_dockWidgetWindow->setPersistentCentralWidget(centralWidget);
     }
 
-    KDDockWidgets::MainWindowBase *m_dockWidgetWindow;
+    KDDockWidgets::QtWidgets::MainWindow *m_dockWidgetWindow;
 };
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    KDDockWidgets::initFrontend(KDDockWidgets::FrontendType::QtWidgets);
 
     TestWindow w;
     w.resize(1500, 400);
