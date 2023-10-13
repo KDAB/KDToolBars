@@ -16,6 +16,8 @@
 #include "toolbar.h"
 #include "toolbartraylayout.h"
 
+#include <QIODevice>
+
 using namespace KDToolBars;
 
 MainWindow::Private::Private(MainWindow *mainWindow)
@@ -134,8 +136,7 @@ QByteArray MainWindow::saveToolBarState() const
 
 bool MainWindow::restoreToolBarState(const QByteArray &state)
 {
-    QByteArray data = state;
-    QDataStream stream(&data, QIODevice::ReadOnly);
+    QDataStream stream(state);
     return d->m_layout->restoreState(stream);
 }
 

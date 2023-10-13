@@ -12,20 +12,27 @@ project(KDToolBars VERSION 0.1.0)
 
 include(GNUInstallDirs)
 
+option(KDTOOLBARS_QT6 "Build against Qt 6" OFF)
+option(KDTOOLBARS_TESTS "Build tests" ON)
+option(KDTOOLBARS_EXAMPLES "Build examples" ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+if(KDTOOLBARS_QT6)
+    set(Qt_VERSION_MAJOR 6)
+else()
+    set(Qt_VERSION_MAJOR 5)
+endif()
+
 find_package(
-    Qt5
+    Qt${Qt_VERSION_MAJOR}
     COMPONENTS Widgets
     REQUIRED
 )
-
-option(KDTOOLBARS_TESTS "Build tests" ON)
-option(KDTOOLBARS_EXAMPLES "Build examples" ON)
 
 add_subdirectory(src)
 

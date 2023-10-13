@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 find_package(
-    Qt5
+    Qt${Qt_VERSION_MAJOR}
     COMPONENTS Test
     REQUIRED
 )
@@ -17,7 +17,7 @@ function(add_kdtoolbars_test name sources)
     set(TARGET_NAME test_kdtoolbars_${name})
     add_executable(${TARGET_NAME} ${sources})
 
-    target_link_libraries(${TARGET_NAME} kdtoolbars Qt5::Test)
+    target_link_libraries(${TARGET_NAME} kdtoolbars Qt::Test)
 
     add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
 endfunction()
