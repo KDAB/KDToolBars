@@ -25,9 +25,16 @@ set(KDTOOLBARS_INSTALLABLE_HEADERS toolbar.h mainwindow.h)
 
 set(KDTOOLBARS_RESOURCES kdtoolbars_resources.qrc)
 
-add_library(kdtoolbars ${KDTOOLBARS_SOURCES} ${KDTOOLBARS_INSTALLABLE_HEADERS} ${KDTOOLBARS_RESOURCES})
+add_library(
+    kdtoolbars ${KDTOOLBARS_LIBRARY_MODE} ${KDTOOLBARS_SOURCES} ${KDTOOLBARS_INSTALLABLE_HEADERS}
+               ${KDTOOLBARS_RESOURCES}
+)
 
-target_link_libraries(kdtoolbars PUBLIC Qt::Widgets Qt::WidgetsPrivate)
+target_link_libraries(
+    kdtoolbars
+    PUBLIC Qt::Widgets
+    PRIVATE Qt::WidgetsPrivate
+)
 
 target_include_directories(
     kdtoolbars PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fwd_headers>

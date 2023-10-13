@@ -14,6 +14,7 @@ include(GNUInstallDirs)
 
 option(KDTOOLBARS_QT6 "Build against Qt 6" OFF)
 option(KDTOOLBARS_TESTS "Build tests" ON)
+option(KDTOOLBARS_STATIC "Build statically" OFF)
 option(KDTOOLBARS_EXAMPLES "Build examples" ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -26,6 +27,12 @@ if(KDTOOLBARS_QT6)
     set(Qt_VERSION_MAJOR 6)
 else()
     set(Qt_VERSION_MAJOR 5)
+endif()
+
+if(KDTOOLBARS_STATIC)
+    set(KDTOOLBARS_LIBRARY_MODE "STATIC")
+else()
+    set(KDTOOLBARS_LIBRARY_MODE "SHARED")
 endif()
 
 find_package(
