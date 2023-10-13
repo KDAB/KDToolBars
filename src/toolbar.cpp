@@ -16,6 +16,7 @@
 #include "toolbarcontainerlayout.h"
 #include "mainwindow.h"
 #include "mainwindow_p.h"
+#include "qt5qt6compat_p.h"
 
 #include <QActionEvent>
 #include <QApplication>
@@ -276,20 +277,20 @@ bool ToolBar::Private::mousePressEvent(const QMouseEvent *me)
         return false;
 
     // start resize?
-    if (resizeStart(me->pos())) {
+    if (resizeStart(Qt5Qt6Compat::eventPos(me))) {
         return true;
     }
 
     // start drag?
     const bool startDrag = [this, me] {
         if (q->isFloating())
-            return titleArea().contains(me->pos());
+            return titleArea().contains(Qt5Qt6Compat::eventPos(me));
         else
-            return handleArea().contains(me->pos());
+            return handleArea().contains(Qt5Qt6Compat::eventPos(me));
     }();
     if (startDrag) {
         m_isDragging = true;
-        m_dragPos = m_initialDragPos = me->pos();
+        m_dragPos = m_initialDragPos = Qt5Qt6Compat::eventPos(me);
         qApp->installEventFilter(this);
         q->grabMouse(Qt::SizeAllCursor);
         return true;
@@ -301,7 +302,7 @@ bool ToolBar::Private::mousePressEvent(const QMouseEvent *me)
 bool ToolBar::Private::mouseMoveEvent(const QMouseEvent *me)
 {
     if (q->isFloating() && isResizing()) {
-        dragMargin(me->globalPos());
+        dragMargin(Qt5Qt6Compat::eventGlobalPos(me));
         return true;
     }
 
@@ -310,11 +311,11 @@ bool ToolBar::Private::mouseMoveEvent(const QMouseEvent *me)
         Q_ASSERT(mw);
         auto *layout = mw->d->m_layout;
         if (q->isFloating()) {
-            const QPoint pos = me->globalPos() - m_dragPos;
+            const QPoint pos = Qt5Qt6Compat::eventGlobalPos(me) - m_dragPos;
             q->move(pos);
             layout->hoverToolBar(q);
         } else {
-            const QPoint delta = me->globalPos() - q->mapToGlobal(m_dragPos);
+            const QPoint delta = Qt5Qt6Compat::eventGlobalPos(me) - q->mapToGlobal(m_dragPos);
             layout->moveToolBar(q, q->pos() + delta);
         }
         return true;
@@ -350,7 +351,7 @@ bool ToolBar::Private::mouseDoubleClickEvent(const QMouseEvent *me)
 {
     if (me->button() != Qt::LeftButton)
         return false;
-    const auto shouldDock = q->isFloating() && titleArea().contains(me->pos());
+    const auto shouldDock = q->isFloating() && titleArea().contains(Qt5Qt6Compat::eventPos(me));
     if (shouldDock) {
         dock();
         return true;
@@ -364,7 +365,7 @@ bool ToolBar::Private::hoverMoveEvent(const QHoverEvent *he)
     if (!isResizing()) {
         const auto cursor = [this, he] {
             if (q->isFloating() && isResizable()) {
-                const auto margin = marginAt(he->pos());
+                const auto margin = marginAt(Qt5Qt6Compat::eventPos(he));
                 switch (margin) {
                 case ToolBar::Private::Margin::Left:
                 case ToolBar::Private::Margin::Right:
@@ -376,7 +377,7 @@ bool ToolBar::Private::hoverMoveEvent(const QHoverEvent *he)
                     break;
                 }
             } else {
-                if (m_isDragging || handleArea().contains(he->pos()))
+                if (m_isDragging || handleArea().contains(Qt5Qt6Compat::eventPos(he)))
                     return Qt::SizeAllCursor;
             }
 
@@ -393,7 +394,7 @@ void ToolBar::Private::dragEnterEvent(QDragEnterEvent *e)
     if (data == nullptr || !q->canDropAction(data->action))
         return;
     m_dropIndicator->show();
-    updateDropIndicatorGeometry(e->pos());
+    updateDropIndicatorGeometry(Qt5Qt6Compat::eventPos(e));
     m_dropIndicator->raise();
     e->acceptProposedAction();
 }
@@ -401,7 +402,7 @@ void ToolBar::Private::dragEnterEvent(QDragEnterEvent *e)
 void ToolBar::Private::dragMoveEvent(QDragMoveEvent *e)
 {
     auto *data = qobject_cast<const ToolbarActionMimeData *>(e->mimeData());
-    if (data != nullptr && q->canDropAction(data->action) && updateDropIndicatorGeometry(e->pos()))
+    if (data != nullptr && q->canDropAction(data->action) && updateDropIndicatorGeometry(Qt5Qt6Compat::eventPos(e)))
         e->accept();
     else
         e->ignore();
@@ -462,7 +463,7 @@ void ToolBar::Private::dropEvent(QDropEvent *e)
     if (!q->canDropAction(actionToInsert))
         return;
 
-    const auto dropSite = m_layout->findDropSite(e->pos());
+    const auto dropSite = m_layout->findDropSite(Qt5Qt6Compat::eventPos(e));
     const auto position = dropSite.itemIndex;
 
     const auto actions = q->actions();

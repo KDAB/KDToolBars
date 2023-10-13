@@ -144,7 +144,7 @@ void ToolBarTrayLayout::doLayout()
             }
         }
 
-        for (const auto &item : qAsConst(items)) {
+        for (const auto &item : std::as_const(items)) {
             auto *widgetItem = item.widgetItem;
             auto itemSize = widgetItem->sizeHint();
             rpick(itemSize) = item.size;

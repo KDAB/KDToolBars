@@ -129,14 +129,14 @@ void ToolBarLayout::updateGeometries() const
         switch (layoutType()) {
         case LayoutType::Vertical: {
             int rowWidth = 0;
-            for (auto *item : qAsConst(m_items))
+            for (auto *item : std::as_const(m_items))
                 rowWidth = std::max(rowWidth, item->sizeHint().width());
 
             QPoint pos;
             ItemRow row;
             int count = 0;
             row.height = rowWidth;
-            for (auto *item : qAsConst(m_items)) {
+            for (auto *item : std::as_const(m_items)) {
                 count++;
                 auto *separator = qobject_cast<ToolBarSeparator *>(item->widget());
                 if (separator != nullptr)
@@ -153,13 +153,13 @@ void ToolBarLayout::updateGeometries() const
         }
         case LayoutType::Horizontal: {
             int rowHeight = 0;
-            for (auto *item : qAsConst(m_items))
+            for (auto *item : std::as_const(m_items))
                 rowHeight = std::max(rowHeight, item->sizeHint().height());
             QPoint pos;
             ItemRow row;
             row.height = rowHeight;
             int count = 0;
-            for (auto *item : qAsConst(m_items)) {
+            for (auto *item : std::as_const(m_items)) {
                 count++;
                 auto *separator = qobject_cast<ToolBarSeparator *>(item->widget());
                 if (separator != nullptr)
@@ -755,7 +755,7 @@ QSize ToolBarLayout::dockedContentsSize(Qt::Orientation orientation) const
     switch (orientation) {
     case Qt::Vertical: {
         int width = 0, height = 0;
-        for (auto *item : qAsConst(m_items)) {
+        for (auto *item : std::as_const(m_items)) {
             const auto &size = item->sizeHint();
             width = std::max(width, size.width());
             height += size.height();
@@ -765,7 +765,7 @@ QSize ToolBarLayout::dockedContentsSize(Qt::Orientation orientation) const
     }
     case Qt::Horizontal: {
         int width = 0, height = 0;
-        for (auto *item : qAsConst(m_items)) {
+        for (auto *item : std::as_const(m_items)) {
             const auto &size = item->sizeHint();
             height = std::max(height, size.height());
             width += size.width();
