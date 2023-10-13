@@ -63,9 +63,9 @@ public:
     bool restoreState(QDataStream &stream);
 
 signals:
-    void toolBarAboutToBeInserted(const ToolBar *toolbar, int index);
-    void toolBarInserted(const ToolBar *toolbar);
-    void toolBarAboutToBeRemoved(const ToolBar *toolbar, int index);
+    void toolBarAboutToBeInserted(const KDToolBars::ToolBar *toolbar, int index);
+    void toolBarInserted(const KDToolBars::ToolBar *toolbar);
+    void toolBarAboutToBeRemoved(const KDToolBars::ToolBar *toolbar, int index);
     void toolBarRemoved();
 
 private:

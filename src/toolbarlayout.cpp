@@ -275,14 +275,14 @@ void ToolBarLayout::setGeometry(const QRect &geometry)
 
     const auto contentsRect = geometry.marginsRemoved(innerContentsMargins());
     const auto contentsTopLeft = contentsRect.topLeft();
-    for (const auto &row : m_itemRows) {
+    for (const auto &row : std::as_const(m_itemRows)) {
         for (auto &item : row.items)
             item.item->setGeometry(item.geometry.translated(contentsTopLeft));
     }
 
     // KDAB_TODO: hide invisible widgets and show visible ones, as done by
     // QToolBarLayout
-    for (auto *item : m_items) {
+    for (auto *item : std::as_const(m_items)) {
         if (auto *widget = item->widget(); widget->isHidden())
             widget->show();
     }

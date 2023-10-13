@@ -109,7 +109,7 @@ void ToolBarTrayLayout::doLayout()
 
     const auto topLeft = m_contentsRect.topLeft();
 
-    for (const auto &row : m_rows) {
+    for (const auto &row : std::as_const(m_rows)) {
         QVector<Item> items;
 
         // find a toolbar that's being dragged in this row
