@@ -5,20 +5,25 @@ Source:
 
 #misc source code
 Files: *.qrc *.json *.ui
-Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
 #misc documentation
 Files: README.md
-Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
 #misc config files
 Files: .pre-commit-config.yaml .codespellrc .krazy .cmake-format .clang-format .clangd .clazy .clang-tidy .gitignore .mdlrc .mdlrc.rb .pep8 .pylintrc appveyor.yml mkdocs.yml code.dev-*.code-workspace code.dev*.code-workspace vscode.code-workspace docs/api/Doxyfile.cmake distro/* *.yaml .gitreview
-Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: BSD-3-Clause
 
-#artwork
-Files: src/img/*.png examples/icons/*.svg
-Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#KDAB artwork
+Files: src/img/*.png
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
+
+#3rdparty artwork
+Files: examples/icons/*.svg
+Copyright: (c) 2013-2023 Cole Bemis
+License: MIT
