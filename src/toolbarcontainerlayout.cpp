@@ -210,7 +210,7 @@ void ToolBarContainerLayout::insertToolBar(ToolBar *before, ToolBar *toolbar)
 
 void ToolBarContainerLayout::insertToolBar(ToolBarTrayLayout *trayLayout, ToolBar *before, ToolBar *toolbar)
 {
-    emit toolBarAboutToBeInserted(toolbar, m_toolbars.size());
+    emit toolBarAboutToBeInserted(toolbar, static_cast<int>(m_toolbars.size()));
 
     addChildWidget(toolbar);
 

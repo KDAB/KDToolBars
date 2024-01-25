@@ -653,7 +653,7 @@ QSize ToolBarLayout::adjustToHeight(int height)
         int left, top, right, bottom;
         getContentsMargins(&left, &top, &right, &bottom);
         int availableHeight = height - (top + bottom + titleHeight());
-        for (int i = m_dynamicLayouts.size() - 1; i > 0; --i) {
+        for (int i = static_cast<int>(m_dynamicLayouts.size()) - 1; i > 0; --i) {
             const auto &layout = m_dynamicLayouts[i];
             const auto &size = layout.minimumSize;
             if (size.height() <= availableHeight)
