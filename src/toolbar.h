@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "kdtoolbars_export.h"
 #include "mainwindow.h"
 
 #include <QFrame>
@@ -30,7 +31,7 @@ enum class ToolBarOption {
 Q_DECLARE_FLAGS(ToolBarOptions, ToolBarOption);
 Q_DECLARE_OPERATORS_FOR_FLAGS(ToolBarOptions);
 
-class ToolBar : public QFrame
+class KDTOOLBARS_EXPORT ToolBar : public QFrame
 {
     Q_OBJECT
 public:

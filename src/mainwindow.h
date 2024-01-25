@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "kdtoolbars_export.h"
+
 #include <QMainWindow>
 
 namespace KDToolBars {
@@ -29,7 +31,7 @@ enum class ToolBarTray {
 Q_DECLARE_FLAGS(ToolBarTrays, ToolBarTray);
 Q_DECLARE_OPERATORS_FOR_FLAGS(ToolBarTrays);
 
-class MainWindow : public QMainWindow
+class KDTOOLBARS_EXPORT MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:

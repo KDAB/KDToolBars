@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "kdtoolbars_export.h"
+
 #include <QLayout>
 
 namespace KDToolBars {
@@ -24,7 +26,7 @@ struct ToolBarLayoutState
     bool load(QDataStream &stream);
 };
 
-class ToolBarLayout : public QLayout
+class KDTOOLBARS_EXPORT ToolBarLayout : public QLayout
 {
     Q_OBJECT
 public:

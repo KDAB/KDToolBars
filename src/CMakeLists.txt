@@ -41,6 +41,12 @@ target_include_directories(
                       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+if(KDTOOLBARS_STATIC)
+    target_compile_definitions(kdtoolbars PUBLIC KDTOOLBARS_STATICLIB)
+else()
+    target_compile_definitions(kdtoolbars PRIVATE BUILDING_KDTOOLBARS_LIBRARY)
+endif()
+
 foreach(file ${KDTOOLBARS_INSTALLABLE_HEADERS})
     get_filename_component(dir ${file} DIRECTORY)
     install(FILES ${file} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kdtoolbars/${dir})
