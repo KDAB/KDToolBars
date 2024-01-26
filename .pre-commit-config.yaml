@@ -16,14 +16,18 @@ repos:
   - id: check-case-conflict
   - id: check-yaml
     args: [--allow-multiple-documents]
+    exclude: (.clang-tidy)
   - id: check-json
+  - id: check-symlinks
+  - id: destroyed-symlinks
+  - id: check-executables-have-shebangs
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v17.0.2
+  rev: v17.0.6
   hooks:
   - id: clang-format
     exclude: (.json)
 - repo: https://github.com/PyCQA/pylint
-  rev: v3.0.1
+  rev: v3.0.3
   hooks:
   - id: pylint
     exclude: ^(.cmake-format.py|conan/conanfile.py)
@@ -50,6 +54,6 @@ repos:
     language: ruby
     files: \.(md|mdown|markdown)$
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v2.1.0
+  rev: v3.0.1
   hooks:
   - id: reuse
