@@ -6,7 +6,7 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.15)
 
 project(KDToolBars VERSION 0.1.0)
 
