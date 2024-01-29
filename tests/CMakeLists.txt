@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 find_package(
-    Qt${Qt_VERSION_MAJOR}
+    Qt${QT_VERSION_MAJOR}
     COMPONENTS Test
     REQUIRED
 )

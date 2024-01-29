@@ -10,11 +10,15 @@ cmake_minimum_required(VERSION 3.15)
 
 project(KDToolBars VERSION 0.1.0)
 
+include(FeatureSummary)
 include(GNUInstallDirs)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
 
 option(KDTOOLBARS_QT6 "Build against Qt 6" OFF)
 option(KDTOOLBARS_TESTS "Build tests" ON)
 option(KDTOOLBARS_STATIC "Build statically" OFF)
+option(KDTOOLBARS_DOCS "Build the API documentation" OFF)
 option(KDTOOLBARS_EXAMPLES "Build examples" ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -24,9 +28,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 if(KDTOOLBARS_QT6)
-    set(Qt_VERSION_MAJOR 6)
+    set(QT_VERSION_MAJOR 6)
 else()
-    set(Qt_VERSION_MAJOR 5)
+    set(QT_VERSION_MAJOR 5)
 endif()
 
 if(KDTOOLBARS_STATIC)
@@ -36,10 +40,11 @@ else()
 endif()
 
 find_package(
-    Qt${Qt_VERSION_MAJOR}
+    Qt${QT_VERSION_MAJOR}
     COMPONENTS Widgets
     REQUIRED
 )
+include(KDQtInstallPaths) # to set QT_INSTALL_FOO variables
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -54,4 +59,8 @@ endif()
 if(KDTOOLBARS_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(KDTOOLBARS_DOCS)
+    add_subdirectory(docs) # needs to go last, in case there are build source files
 endif()

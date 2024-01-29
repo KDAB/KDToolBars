@@ -9,7 +9,7 @@ Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
 #misc documentation
-Files: README.md
+Files: README.md docs/KDToolBars-CopyrightAssignmentForm.pdf *.html
 Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
@@ -19,7 +19,7 @@ Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: BSD-3-Clause
 
 #KDAB artwork
-Files: src/img/*.png
+Files: src/img/*.png docs/api/*.png
 Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
