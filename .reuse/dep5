@@ -29,6 +29,6 @@ Copyright: (c) 2013-2023 Cole Bemis
 License: MIT
 
 # doxygen awesome
-Files: docs/doxygen-awesome.css
+Files: docs/api/doxygen-awesome.css
 Copyright: 2021 - 2023 jothepro
 License: MIT
