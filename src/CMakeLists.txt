@@ -41,7 +41,7 @@ target_include_directories(
                       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-if(KDTOOLBARS_STATIC)
+if(KDToolBars_STATIC)
     target_compile_definitions(kdtoolbars PUBLIC KDTOOLBARS_STATICLIB)
 else()
     target_compile_definitions(kdtoolbars PRIVATE BUILDING_KDTOOLBARS_LIBRARY)
