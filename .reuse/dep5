@@ -23,6 +23,11 @@ Files: src/img/*.png docs/api/*.png
 Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: GPL-2.0-only OR GPL-3.0-only
 
+#3rdparty ECM (a few are missing reuse headers)
+Files: cmake/ECM/modules/ecm_uninstall.cmake.in
+Copyright: The KDE Project
+License: BSD-3-Clause
+
 #3rdparty artwork
 Files: examples/icons/*.svg
 Copyright: (c) 2013-2023 Cole Bemis

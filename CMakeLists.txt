@@ -13,6 +13,7 @@ project(KDToolBars VERSION 0.1.0)
 include(FeatureSummary)
 include(GNUInstallDirs)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
 
 option(KDTOOLBARS_QT6 "Build against Qt 6" OFF)
@@ -46,9 +47,23 @@ find_package(
 )
 include(KDQtInstallPaths) # to set QT_INSTALL_FOO variables
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(KDToolBars_IS_ROOT_PROJECT TRUE)
+
+    message(STATUS "Building KDToolBars ${KDToolBars_VERSION} in ${CMAKE_BUILD_TYPE} mode. "
+                   "Installing to ${CMAKE_INSTALL_PREFIX}"
+    )
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+else()
+    # Always disable tests, examples, docs when used as a submodule
+    set(KDToolBars_IS_ROOT_PROJECT FALSE)
+    set(KDTOOLBARS_TESTS FALSE)
+    set(KDTOOLBARS_EXAMPLES FALSE)
+    set(KKDTOOLBARS_DOCS FALSE)
+endif()
 
 add_subdirectory(src)
 
@@ -63,4 +78,9 @@ endif()
 
 if(KDTOOLBARS_DOCS)
     add_subdirectory(docs) # needs to go last, in case there are build source files
+endif()
+
+if(KDToolBars_IS_ROOT_PROJECT)
+    # Add uninstall target (not for submodules since parent projects typically have uninstall too)
+    include(ECMUninstallTarget)
 endif()
