@@ -9,7 +9,9 @@
 add_subdirectory(simple)
 add_subdirectory(customization)
 
-find_package(KDDockWidgets 2.0.0 QUIET)
+set(KDDockWidgetsPackageName KDDockWidgets${KDTOOLBARS_LIBRARY_QTID})
+find_package(${KDDockWidgetsPackageName} CONFIG)
+set(KDDockWidgets_FOUND ${${KDDockWidgetsPackageName}_FOUND})
 if(KDDockWidgets_FOUND)
     add_subdirectory(kddw-integration)
 endif()

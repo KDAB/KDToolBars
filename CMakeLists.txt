@@ -30,8 +30,10 @@ set(CMAKE_AUTOUIC ON)
 
 if(KDToolBars_QT6)
     set(QT_VERSION_MAJOR 6)
+    set(KDTOOLBARS_LIBRARY_QTID "-qt6")
 else()
     set(QT_VERSION_MAJOR 5)
+    set(KDTOOLBARS_LIBRARY_QTID "")
 endif()
 
 if(KDToolBars_STATIC)
