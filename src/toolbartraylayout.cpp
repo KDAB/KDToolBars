@@ -249,7 +249,6 @@ void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
 
     // should we move the toolbar to another row?
     if (newRow == -1 && !unplug) {
-        const auto curRowPos = m_rows[itemPath->row].pos;
         for (int i = 0, count = m_rows.count(); i < count; ++i) {
             const auto &row = m_rows[i];
             if (center >= row.pos && center < row.pos + perp(row.sizeHint)) {
@@ -614,7 +613,6 @@ bool ToolBarTrayLayout::hoverToolBar(ToolBar *toolbar)
     auto &items = m_rows[plugRow].items;
 
     items.append(Item { layoutItem, pick(dockedRect.topLeft()) - pick(contentsTopLeft) });
-    Item *item = &items.back();
 
     toolbar->d->dock();
 

@@ -324,7 +324,7 @@ bool ToolBar::Private::mouseMoveEvent(const QMouseEvent *me)
     return false;
 }
 
-bool ToolBar::Private::mouseReleaseEvent(const QMouseEvent *me)
+bool ToolBar::Private::mouseReleaseEvent(const QMouseEvent *)
 {
     if (isResizing()) {
         resizeEnd();
@@ -620,7 +620,7 @@ bool ToolBar::Private::eventFilter(QObject *watched, QEvent *event)
             auto *me = static_cast<QMouseEvent *>(event);
             if (me->button() == Qt::LeftButton && q->canDragAction(sourceAction)) {
                 // We're customizing toolbars, start dragging this action
-                QDrag *drag = new QDrag(q);
+                auto *drag = new QDrag(q);
                 {
                     QPixmap iconPixmap(sourceWidget->size());
                     QPainter painter(&iconPixmap);
@@ -761,7 +761,6 @@ void ToolBar::paintEvent(QPaintEvent *event)
 
         static const QColor captionColor = QColor(156, 182, 209);
 
-        const auto active = window()->isActiveWindow();
         p.setPen(palette().window().color().darker(130));
         p.setBrush(captionColor);
         p.drawRect(titleArea.adjusted(0, 1, -1, -3));
@@ -831,7 +830,7 @@ bool ToolBar::event(QEvent *event)
     default:
         break;
     }
-    return QWidget::event(event);
+    return QFrame::event(event);
 }
 
 void ToolBar::childEvent(QChildEvent *e)
@@ -900,7 +899,7 @@ void ToolBar::clear()
 
 QAction *ToolBar::addSeparator()
 {
-    QAction *action = new QAction(this);
+    auto *action = new QAction(this);
     action->setSeparator(true);
     addAction(action);
     return action;

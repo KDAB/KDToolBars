@@ -49,6 +49,7 @@ class TestWindow : public KDToolBars::MainWindow
 {
 public:
     explicit TestWindow(QWidget *parent = nullptr)
+        : KDToolBars::MainWindow(parent)
     {
         setWindowTitle(tr("KDToolBars example"));
 

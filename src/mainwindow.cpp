@@ -150,6 +150,6 @@ void MainWindow::customizeToolBars()
     if (d->m_customizingToolBars)
         return;
 
-    ToolBarCustomizationDialog *dlg = new ToolBarCustomizationDialog(this, this);
+    auto *dlg = new ToolBarCustomizationDialog(this, this);
     dlg->show();
 }

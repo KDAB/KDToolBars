@@ -290,8 +290,8 @@ void ToolBarLayout::setGeometry(const QRect &geometry)
     if (m_closeButton) {
         if (auto *widget = m_closeButton->widget()) {
             if (m_toolbar->isFloating()) {
-                int left, top, right, bottom;
-                getContentsMargins(&left, &top, &right, &bottom);
+                int top, right;
+                getContentsMargins(nullptr, &top, &right, nullptr);
                 const auto titleHeight = this->titleHeight();
                 const auto size = widget->sizeHint();
                 const auto topLeft = QPoint(
@@ -466,7 +466,6 @@ const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(
     if (m_items.empty())
         return nullptr;
     Q_ASSERT(!m_dynamicLayouts.empty());
-    const auto itemCount = static_cast<int>(m_items.size());
     for (size_t i = m_dynamicLayouts.size() - 1; i > 0; --i) {
         const auto &layout = m_dynamicLayouts[i];
         const auto height = layout.minimumSize.height();
@@ -578,8 +577,8 @@ int ToolBarLayout::titleHeight(bool floating) const
 
 QRect ToolBarLayout::titleArea() const
 {
-    int left, top, right, bottom;
-    getContentsMargins(&left, &top, &right, &bottom);
+    int left, top, right;
+    getContentsMargins(&left, &top, &right, nullptr);
     const auto titleHeight = this->titleHeight();
     return QRect(QPoint(left, top), QSize(m_geometry.width() - (left + right), titleHeight));
 }
@@ -623,8 +622,8 @@ QSize ToolBarLayout::adjustToWidth(int width)
         return QSize(0, 0);
     const auto &layout = [this, width]() -> const DynamicLayout & {
         Q_ASSERT(!m_dynamicLayouts.empty());
-        int left, top, right, bottom;
-        getContentsMargins(&left, &top, &right, &bottom);
+        int left, right;
+        getContentsMargins(&left, nullptr, &right, nullptr);
         int availableWidth = width - (left + right);
         for (int i = 0; i < m_dynamicLayouts.size() - 1; ++i) {
             const auto &layout = m_dynamicLayouts[i];
@@ -650,8 +649,8 @@ QSize ToolBarLayout::adjustToHeight(int height)
         return QSize(0, 0);
     const auto &layout = [this, height]() -> const DynamicLayout & {
         Q_ASSERT(!m_dynamicLayouts.empty());
-        int left, top, right, bottom;
-        getContentsMargins(&left, &top, &right, &bottom);
+        int top, bottom;
+        getContentsMargins(nullptr, &top, nullptr, &bottom);
         int availableHeight = height - (top + bottom + titleHeight());
         for (int i = static_cast<int>(m_dynamicLayouts.size()) - 1; i > 0; --i) {
             const auto &layout = m_dynamicLayouts[i];

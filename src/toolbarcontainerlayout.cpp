@@ -41,7 +41,7 @@ ToolBarContainerLayout::~ToolBarContainerLayout()
     qDeleteAll(m_trays);
 }
 
-void ToolBarContainerLayout::addItem(QLayoutItem *item)
+void ToolBarContainerLayout::addItem(QLayoutItem *)
 {
     qWarning("ToolBarTrayContainerLayout::addItem: Please use addToolBar instead");
 }
