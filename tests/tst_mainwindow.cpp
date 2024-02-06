@@ -17,7 +17,7 @@
 
 using namespace KDToolBars;
 
-Q_DECLARE_METATYPE(const ToolBar *)
+Q_DECLARE_METATYPE(const KDToolBars::ToolBar *)
 
 class TestMainWindow : public QObject
 {
@@ -33,7 +33,7 @@ void TestMainWindow::testSimple()
 
     QCOMPARE(mw.toolBarCount(), 0);
 
-    qRegisterMetaType<const ToolBar *>();
+    qRegisterMetaType<const KDToolBars::ToolBar *>();
     QSignalSpy insertedSpy(&mw, &MainWindow::toolBarInserted);
     QSignalSpy removedSpy(&mw, &MainWindow::toolBarRemoved);
 
