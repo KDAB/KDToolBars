@@ -139,5 +139,5 @@ int main(int argc, char *argv[])
     w.resize(1500, 400);
     w.show();
 
-    return app.exec();
+    return app.exec(); // NOLINT(readability-static-accessed-through-instance)
 }

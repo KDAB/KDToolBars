@@ -356,8 +356,7 @@ void ToolBarContainerLayout::saveState(QDataStream &stream) const
 bool ToolBarContainerLayout::restoreState(QDataStream &stream)
 {
     int version, toolbarCount;
-    stream >> version;
-    stream >> toolbarCount;
+    stream >> version >> toolbarCount;
     if (stream.status() != QDataStream::Ok || version != kLayoutVersionMarker)
         return false;
 

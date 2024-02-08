@@ -523,11 +523,10 @@ int ToolBarTrayLayout::adjustItemSizes(QVector<Item> &items, int availableSize) 
     auto used = 0;
     for (auto &item : items) {
         const auto *widgetItem = item.widgetItem;
-        const auto itemSize = pick(widgetItem->sizeHint());
         const auto itemMinimumSize = pick(widgetItem->minimumSize());
         const auto itemExtra = std::min(pick(widgetItem->sizeHint()) - itemMinimumSize, extra);
         item.size = itemMinimumSize + itemExtra;
-        Q_ASSERT(item.size <= itemSize);
+        Q_ASSERT(item.size <= pick(widgetItem->sizeHint()));
         extra -= itemExtra;
         used += item.size;
     }

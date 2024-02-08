@@ -78,6 +78,7 @@ Checks:
 -readability-simplify-boolean-expr,
 -readability-redundant-access-specifiers,
 -readability-identifier-length,
+-readability-isolate-declaration,
 -readability-misleading-indentation,
 -readability-make-member-function-const,
 -readability-suspicious-call-argument,
