@@ -2,12 +2,30 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "dev",
+            "name": "dev-base",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-dev",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
+        },
+        {
+            "name": "dev",
+            "binaryDir": "${sourceDir}/build-dev",
+            "inherits": [
+                "dev-base"
+            ]
+        },
+        {
+            "name": "dev6",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-dev6",
+            "cacheVariables": {
+                "KDToolBars_QT6": "ON"
+            },
+            "inherits": [
+                "dev-base"
+            ]
         }
     ]
 }
