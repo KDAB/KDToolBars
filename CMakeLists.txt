@@ -13,20 +13,14 @@ project(KDToolBars VERSION 0.1.0)
 include(FeatureSummary)
 include(GNUInstallDirs)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/modules")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
-
 option(KDToolBars_QT6 "Build against Qt 6" OFF)
 option(KDToolBars_TESTS "Build tests" ON)
 option(KDToolBars_STATIC "Build statically" OFF)
 option(KDToolBars_DOCS "Build the API documentation" OFF)
 option(KDToolBars_EXAMPLES "Build examples" ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
 
 if(KDToolBars_QT6)
     set(QT_VERSION_MAJOR 6)
@@ -34,12 +28,6 @@ if(KDToolBars_QT6)
 else()
     set(QT_VERSION_MAJOR 5)
     set(KDTOOLBARS_LIBRARY_QTID "")
-endif()
-
-if(KDToolBars_STATIC)
-    set(KDTOOLBARS_LIBRARY_MODE "STATIC")
-else()
-    set(KDTOOLBARS_LIBRARY_MODE "SHARED")
 endif()
 
 find_package(
@@ -66,6 +54,23 @@ else()
     set(KDToolBars_EXAMPLES FALSE)
     set(KDToolBars_DOCS FALSE)
 endif()
+
+if(KDToolBars_STATIC)
+    set(KDTOOLBARS_LIBRARY_MODE "STATIC")
+else()
+    set(KDTOOLBARS_LIBRARY_MODE "SHARED")
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+# Default to hidden visibility for symbols
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 add_subdirectory(src)
 
