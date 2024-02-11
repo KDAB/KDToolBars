@@ -18,6 +18,7 @@ option(KDToolBars_TESTS "Build tests" ON)
 option(KDToolBars_STATIC "Build statically" OFF)
 option(KDToolBars_DOCS "Build the API documentation" OFF)
 option(KDToolBars_EXAMPLES "Build examples" ON)
+option(KDToolBars_DEVELOPER_MODE "Developer Mode" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
@@ -36,6 +37,11 @@ find_package(
     REQUIRED
 )
 include(KDQtInstallPaths) # to set QT_INSTALL_FOO variables
+
+# Always build the test harness in developer-mode
+if(KDToolBars_DEVELOPER_MODE)
+    set(KDToolBars_TESTS ON)
+endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     set(KDToolBars_IS_ROOT_PROJECT TRUE)

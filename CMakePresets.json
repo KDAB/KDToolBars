@@ -6,6 +6,8 @@
             "generator": "Ninja",
             "hidden": true,
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "KDToolBars_DEVELOPER_MODE": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },
