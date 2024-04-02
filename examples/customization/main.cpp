@@ -57,13 +57,15 @@ public:
         createToolBars();
     }
 
+    ~TestWindow() = default;
+
 private:
     void createToolBars()
     {
-        auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" }, true);
-        auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" }, true);
-        auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" }, true);
-        auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" }, false);
+        auto *tb1 = makeToolBar("toolbar 1", { "coffee", "globe", nullptr, "sun", "moon", nullptr, "cloud", "cloud-rain" }, true, this);
+        auto *tb2 = makeToolBar("toolbar 2", { "feather", "upload", "download" }, true, this);
+        auto *tb3 = makeToolBar("toolbar 3", { "file", "folder", "star", nullptr, "arrow-left", "arrow-up", "arrow-down", "arrow-right" }, true, this);
+        auto *tb4 = makeToolBar("toolbar 4", { "music", "image", "video", "file-text" }, false, this);
 
         addToolBar(tb1);
         insertToolBar(tb1, tb2);

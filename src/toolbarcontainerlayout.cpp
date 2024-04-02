@@ -38,6 +38,7 @@ ToolBarContainerLayout::ToolBarContainerLayout(QWidget *parent)
 
 ToolBarContainerLayout::~ToolBarContainerLayout()
 {
+    delete m_centralWidget;
     qDeleteAll(m_trays);
 }
 
