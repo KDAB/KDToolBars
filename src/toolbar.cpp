@@ -31,7 +31,7 @@
 
 using namespace KDToolBars;
 
-static void initKDToolBarsResources()
+static void initKDToolBarsResources() // NOLINT
 {
     Q_INIT_RESOURCE(kdtoolbars_resources);
 }
