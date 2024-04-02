@@ -201,13 +201,6 @@ ToolBarCustomizationDialog::ToolBarCustomizationDialog(MainWindow *mainWindow, Q
         updateButtons);
     updateButtons();
 
-#if 0
-    m_showToolTips->setChecked(m_mainWindow->IsToolTipEnabled());
-    connect(m_showToolTips, &QCheckBox::stateChanged, this, [this](int state) {
-        m_mainWindow->SetToolTipEnabled(state == Qt::Checked);
-    });
-#endif
-
     m_mainWindow->d->setCustomizingToolBars(true);
 }
 
