@@ -21,7 +21,7 @@ set(KDTOOLBARS_SOURCES
     toolbarcustomizationdialog.h
 )
 
-set(KDTOOLBARS_INSTALLABLE_HEADERS toolbar.h mainwindow.h)
+set(KDTOOLBARS_INSTALLABLE_HEADERS toolbar.h mainwindow.h kdtoolbars_export.h)
 
 set(KDTOOLBARS_RESOURCES kdtoolbars_resources.qrc)
 
