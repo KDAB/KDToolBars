@@ -82,7 +82,7 @@ private:
     std::array<ToolBarTrayLayout *, TrayCount> m_trays;
     std::vector<ToolBar *> m_toolbars;
     std::unordered_map<const ToolBar *, ToolBarTrayLayout *> m_toolbarTray;
-    QLayoutItem *m_centralWidget = nullptr;
+    QLayoutItem *m_centralWidgetLayoutItem = nullptr;
     std::unique_ptr<QWidget> m_actionContainer;
 
     template<typename TraySizeGetterT, typename WidgetSizeGetterT>

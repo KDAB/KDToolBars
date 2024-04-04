@@ -38,7 +38,7 @@ ToolBarContainerLayout::ToolBarContainerLayout(QWidget *parent)
 
 ToolBarContainerLayout::~ToolBarContainerLayout()
 {
-    delete m_centralWidget;
+    delete m_centralWidgetLayoutItem;
     qDeleteAll(m_trays);
 }
 
@@ -52,7 +52,7 @@ int ToolBarContainerLayout::count() const
     auto count = std::accumulate(m_trays.begin(), m_trays.end(), 0, [](int count, const auto &tray) {
         return count + tray->count();
     });
-    if (m_centralWidget != nullptr)
+    if (m_centralWidgetLayoutItem != nullptr)
         ++count;
     return count;
 }
@@ -67,7 +67,7 @@ QLayoutItem *ToolBarContainerLayout::itemAt(int index) const
             index -= trayCount;
         }
     }
-    return index == 0 ? m_centralWidget : nullptr;
+    return index == 0 ? m_centralWidgetLayoutItem : nullptr;
 }
 
 QLayoutItem *ToolBarContainerLayout::takeAt(int index)
@@ -81,8 +81,8 @@ QLayoutItem *ToolBarContainerLayout::takeAt(int index)
         }
     }
     if (index == 0) {
-        auto *item = m_centralWidget;
-        m_centralWidget = nullptr;
+        auto *item = m_centralWidgetLayoutItem;
+        m_centralWidgetLayoutItem = nullptr;
         return item;
     }
     return nullptr;
@@ -132,10 +132,10 @@ void ToolBarContainerLayout::setGeometry(const QRect &rect)
     bottomRect.setTop(contentsRect.top() + topHeight + centerHeight);
     bottomTray()->setGeometry(bottomRect);
 
-    if (m_centralWidget != nullptr) {
+    if (m_centralWidgetLayoutItem != nullptr) {
         const auto pos = contentsRect.topLeft() + QPoint(leftWidth, topHeight);
         const auto size = QSize(centerWidth, centerHeight);
-        m_centralWidget->setGeometry(QRect(pos, size));
+        m_centralWidgetLayoutItem->setGeometry(QRect(pos, size));
     }
 }
 
@@ -158,7 +158,7 @@ QSize ToolBarContainerLayout::layoutSize(
     const auto rightSize = (rightTray()->*traySize)();
     const auto bottomSize = (bottomTray()->*traySize)();
     const auto centralWidgetSize =
-        m_centralWidget != nullptr ? (m_centralWidget->*widgetSize)() : QSize(0, 0);
+        m_centralWidgetLayoutItem != nullptr ? (m_centralWidgetLayoutItem->*widgetSize)() : QSize(0, 0);
     const auto width = std::max(
         { topSize.width(), leftSize.width() + centralWidgetSize.width() + rightSize.width(),
           bottomSize.width() });
@@ -176,8 +176,8 @@ void ToolBarContainerLayout::invalidate()
 
 void ToolBarContainerLayout::setCentralWidget(QWidget *widget)
 {
-    if (m_centralWidget != nullptr) {
-        auto *oldWidget = m_centralWidget->widget();
+    if (m_centralWidgetLayoutItem != nullptr) {
+        auto *oldWidget = m_centralWidgetLayoutItem->widget();
         if (oldWidget != nullptr) {
             oldWidget->hide();
             removeWidget(oldWidget);
@@ -185,10 +185,10 @@ void ToolBarContainerLayout::setCentralWidget(QWidget *widget)
     }
     if (widget != nullptr) {
         addChildWidget(widget);
-        m_centralWidget = QLayoutPrivate::createWidgetItem(this, widget);
+        m_centralWidgetLayoutItem = QLayoutPrivate::createWidgetItem(this, widget);
     } else {
-        delete m_centralWidget;
-        m_centralWidget = nullptr;
+        delete m_centralWidgetLayoutItem;
+        m_centralWidgetLayoutItem = nullptr;
     }
     invalidate();
 }
