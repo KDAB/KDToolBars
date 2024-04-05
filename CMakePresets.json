@@ -2,14 +2,63 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "dev-base",
+            "name": "base",
             "generator": "Ninja",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "KDToolBars_DEVELOPER_MODE": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
+        },
+        {
+            "name": "dev-base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "KDToolBars_DEVELOPER_MODE": "ON"
+            },
+            "inherits": [
+                "base"
+            ]
+        },
+        {
+            "name": "release-base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "inherits": [
+                "base"
+            ]
+        },
+        {
+            "name": "asan-base",
+            "hidden": true,
+            "cacheVariables": {
+                "ECM_ENABLE_SANITIZERS": "'address;undefined'"
+            },
+            "inherits": [
+                "base"
+            ]
+        },
+        {
+            "name": "static-base",
+            "hidden": true,
+            "cacheVariables": {
+                "KDToolBars_STATIC": "ON"
+            },
+            "inherits": [
+                "base"
+            ]
+        },
+        {
+            "name": "base6",
+            "hidden": true,
+            "cacheVariables": {
+                "KDToolBars_QT6": "ON"
+            },
+            "inherits": [
+                "base"
+            ]
         },
         {
             "name": "dev",
@@ -20,14 +69,164 @@
         },
         {
             "name": "dev6",
-            "generator": "Ninja",
             "binaryDir": "${sourceDir}/build-dev6",
+            "inherits": [
+                "dev-base",
+                "base6"
+            ]
+        },
+        {
+            "name": "dev-asan",
+            "displayName": "dev-asan",
+            "description": "An ASAN/UBSAN build",
+            "binaryDir": "${sourceDir}/build-dev-asan",
+            "inherits": [
+                "dev-base",
+                "asan-base"
+            ]
+        },
+        {
+            "name": "dev6-asan",
+            "displayName": "dev6-asan",
+            "description": "An ASAN/UBSAN build",
+            "binaryDir": "${sourceDir}/build-dev6-asan",
+            "inherits": [
+                "dev-base",
+                "base6",
+                "asan-base"
+            ]
+        },
+        {
+            "name": "dev-static",
+            "binaryDir": "${sourceDir}/build-dev-static",
+            "inherits": [
+                "dev-base",
+                "static-base"
+            ]
+        },
+        {
+            "name": "dev6-static",
+            "binaryDir": "${sourceDir}/build-dev6-static",
+            "inherits": [
+                "dev-base",
+                "static-base",
+                "base6"
+            ]
+        },
+        {
+            "name": "dev-asan-static",
+            "displayName": "dev-asan-static",
+            "description": "An ASAN/UBSAN build",
+            "binaryDir": "${sourceDir}/build-dev-asan-static",
+            "inherits": [
+                "dev-base",
+                "asan-base",
+                "static-base"
+            ]
+        },
+        {
+            "name": "dev6-asan-static",
+            "displayName": "dev6-asan-static",
+            "description": "An ASAN/UBSAN build",
+            "binaryDir": "${sourceDir}/build-dev6-asan-static",
+            "inherits": [
+                "dev-base",
+                "base6",
+                "asan-base",
+                "static-base"
+            ]
+        },
+        {
+            "name": "release",
+            "binaryDir": "${sourceDir}/build-release",
+            "inherits": [
+                "release-base"
+            ]
+        },
+        {
+            "name": "release6",
+            "binaryDir": "${sourceDir}/build-release6",
+            "inherits": [
+                "release-base",
+                "base6"
+            ]
+        },
+        {
+            "name": "release-static",
+            "binaryDir": "${sourceDir}/build-release-static",
+            "inherits": [
+                "release-base",
+                "static-base"
+            ]
+        },
+        {
+            "name": "release6-static",
+            "binaryDir": "${sourceDir}/build-release6-static",
+            "inherits": [
+                "release-base",
+                "static-base",
+                "base6"
+            ]
+        },
+        {
+            "name": "clazy",
+            "displayName": "clazy",
+            "binaryDir": "${sourceDir}/build-clazy",
             "cacheVariables": {
-                "KDToolBars_QT6": "ON"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "KDToolBars_WERROR": "ON",
+                "KDToolBars_EXAMPLES": "OFF"
+            },
+            "environment": {
+                "CXX": "clazy",
+                "CCACHE_DISABLE": "ON"
             },
             "inherits": [
-                "dev-base"
+                "base"
             ]
+        },
+        {
+            "name": "clazy-no-werror",
+            "displayName": "clazy-no-werror",
+            "binaryDir": "${sourceDir}/build-clazy-no-werror",
+            "cacheVariables": {
+                "KDToolBars_WERROR": "OFF"
+            },
+            "inherits": [
+                "clazy"
+            ]
+        },
+        {
+            "name": "clazy6",
+            "displayName": "clazy6",
+            "binaryDir": "${sourceDir}/build-clazy6",
+            "environment": {
+                "CXX": "clazy",
+                "CCACHE_DISABLE": "ON"
+            },
+            "inherits": [
+                "clazy",
+                "base6"
+            ]
+        },
+        {
+            "name": "clazy6-no-werror",
+            "displayName": "clazy6-no-werror",
+            "binaryDir": "${sourceDir}/build-clazy6-no-werror",
+            "inherits": [
+                "clazy-no-werror",
+                "base6"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "clazy",
+            "configurePreset": "clazy",
+            "environment": {
+                "CLAZY_CHECKS": "level2,detaching-member,heap-allocated-small-trivial-type,isempty-vs-count,qstring-varargs,qvariant-template-instantiation,raw-environment-function,reserve-candidates,signal-with-return-value,thread-with-slots,no-ctor-missing-parent-argument,no-missing-typeinfo,no-skipped-base-method",
+                "CCACHE_DISABLE": "ON"
+            }
         }
     ]
 }
