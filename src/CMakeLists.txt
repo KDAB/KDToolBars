@@ -48,8 +48,13 @@ else()
 endif()
 
 # Enable -Werror
-if(KDToolBars_WERROR AND (NOT MSVC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-    target_compile_options(kdtoolbars PRIVATE -Werror -Wundef -Wno-error=deprecated-declarations)
+if(KDToolBars_WERROR)
+    if(NOT MSVC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        target_compile_options(kdtoolbars PRIVATE -Werror -Wundef -Wno-error=deprecated-declarations)
+    else()
+        target_compile_options(kdtoolbars PRIVATE /WX)
+        add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+    endif()
 endif()
 
 foreach(file ${KDTOOLBARS_INSTALLABLE_HEADERS})
