@@ -47,6 +47,11 @@ else()
     target_compile_definitions(kdtoolbars PRIVATE BUILDING_KDTOOLBARS_LIBRARY)
 endif()
 
+# Enable -Werror
+if(KDToolBars_WERROR AND (NOT MSVC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+    target_compile_options(kdtoolbars PRIVATE -Werror -Wundef -Wno-error=deprecated-declarations)
+endif()
+
 foreach(file ${KDTOOLBARS_INSTALLABLE_HEADERS})
     get_filename_component(dir ${file} DIRECTORY)
     install(FILES ${file} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kdtoolbars/${dir})
