@@ -227,6 +227,21 @@
                 "CLAZY_CHECKS": "level2,detaching-member,heap-allocated-small-trivial-type,isempty-vs-count,qstring-varargs,qvariant-template-instantiation,raw-environment-function,reserve-candidates,signal-with-return-value,thread-with-slots,no-ctor-missing-parent-argument,no-missing-typeinfo,no-skipped-base-method",
                 "CCACHE_DISABLE": "ON"
             }
+        },
+        {
+            "name": "clazy6",
+            "configurePreset": "clazy6",
+            "inherits": "clazy"
+        },
+        {
+            "name": "clazy-no-werror",
+            "configurePreset": "clazy-no-werror",
+            "inherits": "clazy"
+        },
+        {
+            "name": "clazy6-no-werror",
+            "configurePreset": "clazy6-no-werror",
+            "inherits": "clazy"
         }
     ]
 }
