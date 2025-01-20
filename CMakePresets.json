@@ -175,7 +175,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "KDToolBars_WERROR": "ON",
-                "KDToolBars_EXAMPLES": "OFF"
+                "KDToolBars_EXAMPLES": "OFF",
+                "KDToolBars_TESTS": "OFF"
             },
             "environment": {
                 "CXX": "clazy",

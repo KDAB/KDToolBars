@@ -62,6 +62,7 @@ namespace KDToolBars {
 
 class DropIndicator : public QWidget
 {
+    Q_OBJECT
 public:
     explicit DropIndicator(QWidget *parent = nullptr)
         : QWidget(parent)
@@ -144,7 +145,7 @@ void ToolBar::Private::init()
     q->setAcceptDrops(true);
 }
 
-ToolBar::Private::Margin ToolBar::Private::marginAt(const QPoint &p) const
+ToolBar::Private::Margin ToolBar::Private::marginAt(QPoint p) const
 {
     constexpr auto kFrameMargin = 4;
     if (p.x() < kFrameMargin)
@@ -158,7 +159,7 @@ ToolBar::Private::Margin ToolBar::Private::marginAt(const QPoint &p) const
     return Margin::None;
 }
 
-bool ToolBar::Private::resizeStart(const QPoint &p)
+bool ToolBar::Private::resizeStart(QPoint p)
 {
     if (isResizing())
         return false;
@@ -177,7 +178,7 @@ void ToolBar::Private::resizeEnd()
     q->setCursor(Qt::ArrowCursor);
 }
 
-void ToolBar::Private::dragMargin(const QPoint &p)
+void ToolBar::Private::dragMargin(QPoint p)
 {
     auto geometry = q->geometry();
     const auto contentsMargins = q->contentsMargins();
@@ -507,7 +508,7 @@ bool ToolBar::Private::isMoving() const
     return !q->isFloating() && m_isDragging;
 }
 
-void ToolBar::Private::undock(const QPoint &pos)
+void ToolBar::Private::undock(QPoint pos)
 {
     if (q->isFloating())
         return;
@@ -521,7 +522,7 @@ void ToolBar::Private::dock()
     setWindowState(false, {});
 }
 
-void ToolBar::Private::setWindowState(bool floating, const QPoint &pos)
+void ToolBar::Private::setWindowState(bool floating, QPoint pos)
 {
     if (m_isDragging) {
         q->releaseMouse();
@@ -539,10 +540,10 @@ void ToolBar::Private::setWindowState(bool floating, const QPoint &pos)
 
     m_layout->invalidate();
 
-    const auto marginsTopLeft = [](const QMargins &margins) {
+    const auto marginsTopLeft = [](QMargins margins) {
         return QPoint(margins.left(), margins.top());
     };
-    const auto marginsSize = [](const QMargins &margins) {
+    const auto marginsSize = [](QMargins margins) {
         return QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
     };
     const auto margins = m_layout->innerContentsMargins();
@@ -567,7 +568,7 @@ void ToolBar::Private::setWindowState(bool floating, const QPoint &pos)
     emit q->isFloatingChanged(floating);
 }
 
-void ToolBar::Private::offsetDragPosition(const QPoint &offset)
+void ToolBar::Private::offsetDragPosition(QPoint offset)
 {
     m_dragPos += offset;
 }
@@ -915,7 +916,7 @@ QSize ToolBar::iconSize() const
     return d->m_iconSize;
 }
 
-void ToolBar::setIconSize(const QSize &iconSize)
+void ToolBar::setIconSize(QSize iconSize)
 {
     d->m_explicitIconSize = true;
     QSize size = iconSize;
@@ -990,7 +991,7 @@ void ToolBar::reset()
 {
 }
 
-void ToolBar::updateIconSize(const QSize &size)
+void ToolBar::updateIconSize(QSize size)
 {
     if (d->m_explicitIconSize)
         return;
@@ -1031,3 +1032,5 @@ bool ToolBarState::load(QDataStream &stream)
     layoutState.load(stream);
     return stream.status() == QDataStream::Ok;
 }
+
+#include "toolbar.moc"

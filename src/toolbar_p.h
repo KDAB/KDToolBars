@@ -44,6 +44,7 @@ public:
 
 class ToolBar::Private : public QObject
 {
+    Q_OBJECT
 public:
     enum class Margin {
         Left,
@@ -57,10 +58,10 @@ public:
 
     void init();
 
-    Margin marginAt(const QPoint &p) const;
-    bool resizeStart(const QPoint &p);
+    Margin marginAt(QPoint p) const;
+    bool resizeStart(QPoint p);
     void resizeEnd();
-    void dragMargin(const QPoint &p);
+    void dragMargin(QPoint p);
 
     void actionEvent(QActionEvent *event);
     bool mousePressEvent(const QMouseEvent *me);
@@ -77,14 +78,14 @@ public:
     QRect handleArea() const;
 
     // update window flags when the toolbar is docked or undocked
-    void setWindowState(bool floating, const QPoint &pos = {});
+    void setWindowState(bool floating, QPoint pos = {});
 
     // toolbar is docked and is being dragged by the handle
     bool isMoving() const;
 
-    void undock(const QPoint &pos);
+    void undock(QPoint pos);
     void dock();
-    void offsetDragPosition(const QPoint &offset);
+    void offsetDragPosition(QPoint offset);
 
     QSize dockedSize() const;
 

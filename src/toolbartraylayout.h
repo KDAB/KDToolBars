@@ -54,7 +54,7 @@ public:
     int count() const;
     QLayoutItem *itemAt(int index) const;
     QLayoutItem *takeAt(int index);
-    void setGeometry(const QRect &rect);
+    void setGeometry(QRect rect);
     QSize sizeHint() const;
     QSize minimumSize() const;
     void invalidate();
@@ -62,7 +62,7 @@ public:
     void insertToolBar(ToolBar *before, ToolBar *toolbar);
     void insertToolBarBreak(ToolBar *before);
 
-    void moveToolBar(ToolBar *toolbar, const QPoint &pos);
+    void moveToolBar(ToolBar *toolbar, QPoint pos);
     void adjustToolBarRow(const ToolBar *toolbar);
     bool hoverToolBar(ToolBar *toolbar);
 
@@ -104,15 +104,15 @@ private:
         int dockedCount() const;
     };
     std::optional<ItemPath> findItem(const QWidget *widget) const;
-    Item *item(const ItemPath &path);
-    QLayoutItem *layoutItem(const ItemPath &path);
-    std::tuple<QLayoutItem *, bool> TakeLayoutItem(const ItemPath &path);
+    Item *item(ItemPath path);
+    QLayoutItem *layoutItem(ItemPath path);
+    std::tuple<QLayoutItem *, bool> TakeLayoutItem(ItemPath path);
     QVector<Item> adjustRow(const Row &row, const ToolBar *pivot) const;
     int adjustItemSizes(QVector<Item> &items, int availableSize) const;
     void updateRowSizes() const;
     void doLayout();
 
-    int pick(const QSize &size) const
+    int pick(QSize size) const
     {
         return m_orientation == Qt::Horizontal ? size.width() : size.height();
     }
@@ -120,7 +120,7 @@ private:
     {
         return m_orientation == Qt::Horizontal ? size.rwidth() : size.rheight();
     }
-    int perp(const QSize &size) const
+    int perp(QSize size) const
     {
         return m_orientation == Qt::Horizontal ? size.height() : size.width();
     }
@@ -128,7 +128,7 @@ private:
     {
         return m_orientation == Qt::Horizontal ? size.rheight() : size.rwidth();
     }
-    int pick(const QPoint &pos) const
+    int pick(QPoint pos) const
     {
         return m_orientation == Qt::Horizontal ? pos.x() : pos.y();
     }
@@ -136,7 +136,7 @@ private:
     {
         return m_orientation == Qt::Horizontal ? pos.rx() : pos.ry();
     }
-    int perp(const QPoint &pos) const
+    int perp(QPoint pos) const
     {
         return m_orientation == Qt::Horizontal ? pos.y() : pos.x();
     }

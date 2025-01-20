@@ -18,6 +18,8 @@
 
 using namespace KDToolBars;
 
+// clazy:excludeall=detaching-member
+
 ToolBarTrayLayout::ToolBarTrayLayout(
     ToolBarTray tray, Qt::Orientation orientation, ToolBarContainerLayout *parent)
     : m_parent(parent)
@@ -96,7 +98,7 @@ void ToolBarTrayLayout::invalidate()
     m_dirty = true;
 }
 
-void ToolBarTrayLayout::setGeometry(const QRect &rect)
+void ToolBarTrayLayout::setGeometry(QRect rect)
 {
     m_contentsRect = rect.marginsRemoved(m_contentsMargins);
     doLayout();
@@ -156,7 +158,7 @@ void ToolBarTrayLayout::doLayout()
     }
 }
 
-void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
+void ToolBarTrayLayout::moveToolBar(ToolBar *toolbar, QPoint pos)
 {
     if (toolbar->isFloating())
         return;
@@ -431,7 +433,7 @@ std::optional<ToolBarTrayLayout::ItemPath> ToolBarTrayLayout::findItem(
     return std::nullopt;
 }
 
-ToolBarTrayLayout::Item *ToolBarTrayLayout::item(const ItemPath &path)
+ToolBarTrayLayout::Item *ToolBarTrayLayout::item(ItemPath path)
 {
     if (path.row < 0 || path.row >= m_rows.count())
         return nullptr;
@@ -441,13 +443,13 @@ ToolBarTrayLayout::Item *ToolBarTrayLayout::item(const ItemPath &path)
     return &items[path.index];
 }
 
-QLayoutItem *ToolBarTrayLayout::layoutItem(const ItemPath &path)
+QLayoutItem *ToolBarTrayLayout::layoutItem(ItemPath path)
 {
     const auto *item = this->item(path);
     return item != nullptr ? item->widgetItem : nullptr;
 }
 
-std::tuple<QLayoutItem *, bool> ToolBarTrayLayout::TakeLayoutItem(const ItemPath &path)
+std::tuple<QLayoutItem *, bool> ToolBarTrayLayout::TakeLayoutItem(ItemPath path)
 {
     Q_ASSERT(path.row >= 0 && path.row < m_rows.count());
     auto &items = m_rows[path.row].items;
@@ -625,7 +627,7 @@ int ToolBarTrayLayout::rowCount() const
 
 int ToolBarTrayLayout::Row::dockedCount() const
 {
-    return std::count_if(items.begin(), items.end(), [](const Item &item) {
+    return std::count_if(items.begin(), items.end(), [](Item item) {
         auto *tb = qobject_cast<ToolBar *>(item.widgetItem->widget());
         Q_ASSERT(tb);
         return !tb->isHidden() && !tb->isFloating();

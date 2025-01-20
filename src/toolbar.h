@@ -55,7 +55,7 @@ public:
     bool isFloating() const;
 
     QSize iconSize() const;
-    void setIconSize(const QSize &size);
+    void setIconSize(QSize size);
 
     Qt::ToolButtonStyle toolButtonStyle() const;
     void setToolButtonStyle(Qt::ToolButtonStyle style);
@@ -75,7 +75,7 @@ public:
     virtual void reset();
 
 signals:
-    void iconSizeChanged(const QSize &size);
+    void iconSizeChanged(QSize size);
     void toolButtonStyleChanged(const Qt::ToolButtonStyle style);
     void isFloatingChanged(bool isFloating);
     void actionsCustomized();
@@ -90,7 +90,7 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
-    void updateIconSize(const QSize &size);
+    void updateIconSize(QSize size);
     void updateToolButtonStyle(Qt::ToolButtonStyle style);
 
     void initStyleOption(QStyleOption *option);

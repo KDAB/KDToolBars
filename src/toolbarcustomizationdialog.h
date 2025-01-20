@@ -26,6 +26,7 @@ class ToolBarListModel;
 
 class ToolBarCustomizationDialog : public QDialog
 {
+    Q_OBJECT
 public:
     explicit ToolBarCustomizationDialog(MainWindow *manager, QWidget *parent = nullptr);
     ~ToolBarCustomizationDialog() override;
