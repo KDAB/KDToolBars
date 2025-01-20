@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only
+
+name: ASAN and UBSAN
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-24.04
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.6
+          cache: true
+
+      - name: Install dependencies on Ubuntu
+        run: |
+          sudo apt update -qq
+          sudo apt install lld ninja-build -y
+
+      - uses: actions/checkout@v4
+
+      - name: Configure project
+        run: cmake -S . -B ./build --preset dev6-asan
+
+      - name: Build
+        run: cmake --build ./build
+
+      - name: Run tests
+        run: ctest --test-dir ./build --verbose

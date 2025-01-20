@@ -20,6 +20,7 @@ option(KDToolBars_DOCS "Build the API documentation" OFF)
 option(KDToolBars_EXAMPLES "Build examples" ON)
 option(KDToolBars_DEVELOPER_MODE "Developer Mode" OFF)
 option(KDToolBars_WERROR "Compile with -Werror" OFF)
+option(KDToolBars_ENABLE_SANITIZERS "Compile with ASAN and UBSAN" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
@@ -28,6 +29,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/KDAB/modules")
 set(default_build_type "Release")
 if(EXISTS "${CMAKE_SOURCE_DIR}/.git" OR KDToolBars_DEVELOPER_MODE)
     set(default_build_type "Debug")
+endif()
+
+if(KDToolBars_ENABLE_SANITIZERS)
+    # For CI usage, but feel free to add MSVC support
+    add_compile_options(-fsanitize=address -fsanitize=undefined)
+    add_link_options(-fsanitize=address -fsanitize=undefined)
 endif()
 
 if(KDToolBars_DEVELOPER_MODE)

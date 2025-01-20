@@ -34,7 +34,7 @@
             "name": "asan-base",
             "hidden": true,
             "cacheVariables": {
-                "ECM_ENABLE_SANITIZERS": "'address;undefined'"
+                "KDToolBars_ENABLE_SANITIZERS": "ON"
             },
             "inherits": [
                 "base"
