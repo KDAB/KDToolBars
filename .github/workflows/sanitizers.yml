@@ -43,3 +43,5 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir ./build --verbose
+        env:
+          QT_QPA_PLATFORM: offscreen
