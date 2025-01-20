@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only
+
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-24.04
+          # - windows-latest
+          # - macos-15
+
+        preset:
+          - name: dev
+            qt_version: "5.15"
+          - name: release
+            qt_version: "5.15"
+          - name: release-static
+            qt_version: "5.15"
+          - name: dev6
+            qt_version: "6.6.*"
+          - name: release6
+            qt_version: "6.6.*"
+          - name: release6-static
+            qt_version: "6.6.*"
+
+    steps:
+      - name: Install Qt ${{ matrix.preset.qt_version }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ matrix.preset.qt_version }}
+          cache: true
+
+      - name: Install ninja (Windows / Linux)
+        if: ${{ runner.os != 'macOS' }}
+        uses: turtlesec-no/get-ninja@main
+
+      - name: Install ninja (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: brew install ninja
+
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Make sure MSVC is found when Ninja generator is in use
+        if: ${{ runner.os == 'Windows' }}
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure project
+        run: cmake -S . -B ./build-${{ matrix.preset.name }} --preset ${{ matrix.preset.name }} -DCMAKE_INSTALL_PREFIX=installed
+
+      - name: Build Project ${{ matrix.preset.build_preset_arg }}
+        run: cmake --build ./build-${{ matrix.preset.name }} ${{ matrix.preset.build_preset_arg }}
+
+      - name: Run tests
+        if: ${{ startsWith(matrix.preset.name, 'dev') }}
+        run: ctest --test-dir ./build-${{ matrix.preset.name }} --verbose
+
+      - name: Install
+        run: cmake --install ./build-${{ matrix.preset.name }}
