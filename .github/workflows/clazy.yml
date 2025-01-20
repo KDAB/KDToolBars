@@ -2,13 +2,16 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only
 
-name: Nightly Clazy
+name: Clazy
 
 on:
-  schedule:
-  - cron: '0 3 * * *'
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
-
 
 jobs:
   build:
