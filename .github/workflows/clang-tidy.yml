@@ -16,16 +16,10 @@ jobs:
         os:
           - ubuntu-24.04
     steps:
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.6
-          cache: true
-
       - name: Install dependencies on Ubuntu
         run: |
           sudo apt update -qq
-          sudo apt install llvm ninja-build -y
+          sudo apt install llvm ninja-build qt6-base-dev -y
 
       - uses: actions/checkout@v4
 
