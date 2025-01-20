@@ -1,0 +1,45 @@
+version = 1
+SPDX-PackageName = "KDToolBars"
+SPDX-PackageSupplier = "<info@kdab.com>"
+
+[[annotations]]
+path = ["**.qrc", "**.json", "**.ui"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "GPL-2.0-only OR GPL-3.0-only"
+
+[[annotations]]
+path = ["README.md", "Changelog", "docs/KDToolBars-CopyrightAssignmentForm.pdf", "**.html"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "GPL-2.0-only OR GPL-3.0-only"
+
+[[annotations]]
+path = [".pre-commit-config.yaml", ".codespellrc", ".krazy", ".cmake-format", ".clang-format", ".clangd", ".clazy", ".clang-tidy", ".gitignore", ".mdlrc", ".mdlrc.rb", ".pep8", ".pylintrc", "appveyor.yml", "mkdocs.yml", "code.dev-**.code-workspace", "code.dev**.code-workspace", "vscode.code-workspace", "docs/api/Doxyfile.cmake", "distro/**", "**.yaml", ".gitreview", ".cmake-format.py"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = ["src/img/**.png", "docs/api/**.png"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "GPL-2.0-only OR GPL-3.0-only"
+
+[[annotations]]
+path = "cmake/ECM/modules/ecm_uninstall.cmake.in"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The KDE Project"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "examples/icons/**.svg"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "(c) 2013-2023 Cole Bemis"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "docs/api/doxygen-awesome.css"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021 - 2023 jothepro"
+SPDX-License-Identifier = "MIT"
