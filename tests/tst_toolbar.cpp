@@ -69,6 +69,8 @@ private slots:
 
 void TestToolBars::testSimple()
 {
+    auto f = new QObject();
+
     auto tb = new ToolBar;
 
     // first item in the layout is the close button
