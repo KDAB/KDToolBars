@@ -48,7 +48,7 @@ public:
     void insertToolBarBreak(ToolBar *before);
     void removeToolBar(ToolBar *toolbar);
 
-    void moveToolBar(ToolBar *toolbar, const QPoint &pos);
+    void moveToolBar(ToolBar *toolbar, QPoint pos);
     void adjustToolBarRow(const ToolBar *toolbar);
     void hoverToolBar(ToolBar *toolbar);
 

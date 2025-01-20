@@ -256,7 +256,7 @@ void ToolBarContainerLayout::insertToolBarBreak(ToolBar *before)
     invalidate();
 }
 
-void ToolBarContainerLayout::moveToolBar(ToolBar *toolbar, const QPoint &pos)
+void ToolBarContainerLayout::moveToolBar(ToolBar *toolbar, QPoint pos)
 {
     auto *tray = toolBarTray(toolbar);
     if (tray == nullptr)
@@ -340,7 +340,8 @@ bool ToolBarContainerLayout::eventFilter(QObject *watched, QEvent *event)
         if (auto *tb = qobject_cast<ToolBar *>(watched))
             m_actionContainer->addAction(action);
     }
-    return false;
+
+    return QLayout::eventFilter(watched, event);
 }
 
 void ToolBarContainerLayout::saveState(QDataStream &stream) const

@@ -318,7 +318,7 @@ void ToolBarLayout::setColumns(int columns)
     invalidate();
 }
 
-void ToolBarLayout::setMinimumSize(const QSize &size)
+void ToolBarLayout::setMinimumSize(QSize size)
 {
     m_minimumSize = size;
 }
@@ -460,8 +460,7 @@ void ToolBarLayout::initializeDynamicLayouts() const
     }
 }
 
-const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(
-    const QSize &availableSize) const
+const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(QSize availableSize) const
 {
     if (m_items.empty())
         return nullptr;
@@ -475,7 +474,7 @@ const ToolBarLayout::DynamicLayout *ToolBarLayout::preferredLayoutForSize(
     return &m_dynamicLayouts.front();
 }
 
-ToolBarLayout::DropSite ToolBarLayout::findDropSite(const QPoint &layoutPos) const
+ToolBarLayout::DropSite ToolBarLayout::findDropSite(QPoint layoutPos) const
 {
     if (m_dirty)
         updateGeometries();
@@ -515,13 +514,13 @@ ToolBarLayout::DropSite ToolBarLayout::findDropSite(const QPoint &layoutPos) con
         return static_cast<int>(std::distance(m_items.begin(), it));
     };
 
-    auto coord = [this, layoutType](const QPoint &pos) {
+    auto coord = [this, layoutType](QPoint pos) {
         return layoutType != LayoutType::Vertical ? pos.x() : pos.y();
     };
 
     // find position within row to insert the item
 
-    const auto &row = m_itemRows[rowIndex];
+    const auto &row = m_itemRows.at(rowIndex);
     const auto &items = row.items;
 
     // find item in row that's closest to pos

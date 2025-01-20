@@ -36,7 +36,7 @@ public:
     int columns() const;
     void setColumns(int columns);
 
-    void setMinimumSize(const QSize &size);
+    void setMinimumSize(QSize size);
 
     int titleHeight() const;
     QRect titleArea() const;
@@ -72,7 +72,7 @@ public:
         QPoint topLeft;
         int size = 0; // width if m_layoutType == LayoutType::Vertical, height otherwise
     };
-    DropSite findDropSite(const QPoint &pos) const;
+    DropSite findDropSite(QPoint pos) const;
 
     // margins for contents excluding the title bar and handle
     QMargins innerContentsMargins() const;
@@ -105,7 +105,7 @@ private:
     void updateGeometries() const;
     void layoutRows(const std::vector<int> &rowBreaks) const;
     void initializeDynamicLayouts() const;
-    const DynamicLayout *preferredLayoutForSize(const QSize &availableSize) const;
+    const DynamicLayout *preferredLayoutForSize(QSize availableSize) const;
 
     ToolBar *m_toolbar;
     QVector<QLayoutItem *> m_items;
