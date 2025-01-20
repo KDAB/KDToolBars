@@ -60,7 +60,7 @@ QLayoutItem *ToolBarTrayLayout::takeAt(int index)
             if (index < rowCount) {
                 auto *item = items.takeAt(index).widgetItem;
                 if (items.empty())
-                    m_rows.erase(it);
+                    m_rows.erase(it); // clazy:exclude=strict-iterators
                 return item;
             }
             index -= rowCount;
