@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only
+
+name: clang-tidy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-24.04
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.6
+          cache: true
+
+      - name: Install dependencies on Ubuntu
+        run: |
+          sudo apt update -qq
+          sudo apt install llvm ninja-build -y
+
+      - uses: actions/checkout@v4
+
+      - name: Configure project
+        run: cmake -S . -B ./build-tidy --preset clang-tidy
+
+      - name: clang-tidy
+        run: cmake --build ./build-tidy

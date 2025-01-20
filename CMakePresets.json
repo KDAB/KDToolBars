@@ -218,6 +218,30 @@
                 "clazy-no-werror",
                 "base6"
             ]
+        },
+        {
+            "name": "clang-tidy",
+            "binaryDir": "${sourceDir}/build-clang-tidy",
+            "inherits": [
+                "base6"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--warnings-as-errors=*",
+                "KDToolBars_TESTS": "OFF",
+                "KDToolBars_EXAMPLES": "OFF"
+            }
+        },
+        {
+            "name": "clang-tidy-no-werror",
+            "binaryDir": "${sourceDir}/build-clang-tidy-no-werror",
+            "inherits": [
+                "base6"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy",
+                "KDToolBars_TESTS": "OFF",
+                "KDToolBars_EXAMPLES": "OFF"
+            }
         }
     ],
     "buildPresets": [

@@ -91,7 +91,6 @@ Checks:
 
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
 
 CheckOptions:
   - key:             cert-oop11-cpp.UseCERTSemantics
