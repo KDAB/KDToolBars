@@ -53,6 +53,12 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: brew install ninja
 
+      - name: Install dependencies on Ubuntu
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt update -qq
+          sudo apt install xvfb -y
+
       - name: Checkout sources
         uses: actions/checkout@v4
 
@@ -66,8 +72,20 @@ jobs:
       - name: Build Project ${{ matrix.preset.build_preset_arg }}
         run: cmake --build ./build-${{ matrix.preset.name }} ${{ matrix.preset.build_preset_arg }}
 
-      - name: Run tests
-        if: ${{ startsWith(matrix.preset.name, 'dev') }}
+      - name: Run tests (Linux offscreen)
+        if: ${{ startsWith(matrix.preset.name, 'dev') && runner.os == 'Linux'}}
+        run: ctest --test-dir ./build-${{ matrix.preset.name }} --verbose
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+      - name: Run tests (Linux XCB)
+        if: ${{ startsWith(matrix.preset.name, 'dev') && runner.os == 'Linux'}}
+        run: xvfb-run ctest --test-dir ./build-${{ matrix.preset.name }} --verbose
+        env:
+          QT_QPA_PLATFORM: xcb
+
+      - name: Run tests (macOS/Windows)
+        if: ${{ startsWith(matrix.preset.name, 'dev') && runner.os != 'Linux'}}
         run: ctest --test-dir ./build-${{ matrix.preset.name }} --verbose
 
       - name: Install
