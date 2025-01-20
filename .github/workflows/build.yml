@@ -23,8 +23,7 @@ jobs:
           - ubuntu-24.04
           - windows-2019
           - windows-latest
-          - macos-13-arm64
-          - macos-15-arm64
+          - macos-13
 
         preset:
           - name: dev
