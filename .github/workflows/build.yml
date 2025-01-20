@@ -21,8 +21,10 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-          # - windows-latest
-          # - macos-15
+          - windows-2019
+          - windows-latest
+          - macos-13
+          - macos-latest
 
         preset:
           - name: dev
